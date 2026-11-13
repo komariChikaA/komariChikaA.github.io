@@ -399,8 +399,11 @@
             '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
             '<font size="1" color="' + syncDotColor + '">●</font>&nbsp;<font size="1" color="' + THEME.textMuted + '" face="Consolas, \'Courier New\', monospace">' + escHtml(syncText) + '</font><br>' +
             '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
-            '<a href="' + escHtml(safeUrl(u.url)) + '" target="_blank"><font size="1" color="' + THEME.pink + '"><b>Bangumi 个人主页 ↗</b></font></a>&nbsp;&nbsp;&nbsp;' +
-            '<button type="button" onclick="window.BGM_APP.syncNow()">↻ 实时同步</button>' +
+            '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
+              '<td bgcolor="#261821" onclick="window.BGM_APP.openExternal(\'' + escJsStr(safeUrl(u.url)) + '\')"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + THEME.pink + '"><b>&nbsp;Bangumi 个人主页 ↗&nbsp;</b></font></td></tr></table></td>' +
+              '<td width="8">' + spacerImg(8, 1) + '</td>' +
+              '<td bgcolor="#132536" onclick="window.BGM_APP.syncNow()"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + THEME.cyan + '"><b>&nbsp;↻ 实时同步&nbsp;</b></font></td></tr></table></td>' +
+            '</tr></table>' +
           '</td>' +
         '</tr>' +
       '</table>';
@@ -731,8 +734,11 @@
               '<table width="100%" border="0" cellpadding="10" cellspacing="0"><tr>' +
                 '<td><font size="2" color="' + accent + '" face="Consolas, monospace"><b>SUBJECT DOSSIER // #' + item.id + ' · ' + (item.st === 4 ? 'GAME' : 'ANIME') + '</b></font></td>' +
                 '<td align="right">' +
-                  '<a href="https://bgm.tv/subject/' + item.id + '" target="_blank"><font size="2" color="' + accent + '"><b>在 Bangumi 打开 ↗</b></font></a>&nbsp;&nbsp;&nbsp;' +
-                  '<button type="button" onclick="window.BGM_APP.closeDetail()">× 关闭详情</button>' +
+                  '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
+                    '<td bgcolor="#1E273B" onclick="window.BGM_APP.openSubjectBgm(' + item.id + ')"><table border="0" cellpadding="5" cellspacing="0"><tr><td><font size="1" color="' + accent + '"><b>&nbsp;在 Bangumi 打开 ↗&nbsp;</b></font></td></tr></table></td>' +
+                    '<td width="8">' + spacerImg(8, 1) + '</td>' +
+                    '<td bgcolor="#2E171D" onclick="window.BGM_APP.closeDetail()"><table border="0" cellpadding="5" cellspacing="0"><tr><td><font size="1" color="#FCA5A5"><b>&nbsp;× 关闭详情&nbsp;</b></font></td></tr></table></td>' +
+                  '</tr></table>' +
                 '</td>' +
               '</tr></table>' +
             '</td></tr>' +
@@ -829,10 +835,14 @@
 
     var bodyHtml =
       '<table width="100%" border="0" cellpadding="8" cellspacing="0"><tr>' +
-        '<td width="88" height="124" valign="middle" align="center" bgcolor="' + THEME.bgDeep + '" onclick="window.BGM_APP.openDetail(' + item.id + ')">' +
-          (item.img ? '<img src="' + escHtml(safeUrl(item.img)) + '" width="82" border="0" alt="' + escHtml(titleMain) + '">' : '<font size="1" color="' + THEME.textDim + '">无图</font>') +
+        '<td width="88" valign="top" align="center" onclick="window.BGM_APP.openDetail(' + item.id + ')">' +
+          '<table border="0" cellpadding="0" cellspacing="1" bgcolor="' + THEME.border + '"><tr>' +
+            '<td width="86" height="122" valign="middle" align="center" bgcolor="' + THEME.bgDeep + '">' +
+              (item.img ? '<img src="' + escHtml(safeUrl(item.img)) + '" width="80" border="0" alt="' + escHtml(titleMain) + '">' : '<font size="1" color="' + THEME.textDim + '">无图</font>') +
+            '</td>' +
+          '</tr></table>' +
         '</td>' +
-        '<td width="8">' + spacerImg(8, 124) + '</td>' +
+        '<td width="8">' + spacerImg(8, 126) + '</td>' +
         '<td valign="top">' +
           '<span onclick="window.BGM_APP.openDetail(' + item.id + ')">' +
             '<font size="3" color="' + THEME.textMain + '"><b>' + escHtml(titleMain) + '</b></font>' +
@@ -845,7 +855,7 @@
             (item.rk > 0 ? ' · <font color="' + THEME.textDim + '">#' + item.rk + '</font>' : '') +
           '</font><br>' +
           progHtml +
-          '<img src="spacer.gif" width="1" height="5" border="0" alt=""><br>' +
+          '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
           tagsHtml +
         '</td>' +
       '</tr></table>';
@@ -861,11 +871,13 @@
 
     var footerHtml =
       '<table width="100%" border="0" cellpadding="6" cellspacing="0"><tr>' +
-        '<td><font size="1" color="' + THEME.textDim + '" face="Consolas, monospace">更新 ' + escHtml(item.u || '-') + '</font></td>' +
-        '<td align="right">' +
-          '<span onclick="window.BGM_APP.openDetail(' + item.id + ')"><font size="1" color="' + typeColor + '"><b>详情</b></font></span>' +
-          '<font size="1" color="' + THEME.textDim + '"> · </font>' +
-          '<a href="https://bgm.tv/subject/' + item.id + '" target="_blank"><font size="1" color="' + THEME.textMuted + '">BGM ↗</font></a>' +
+        '<td valign="middle"><font size="1" color="' + THEME.textDim + '" face="Consolas, monospace">更新 ' + escHtml(item.u || '-') + '</font></td>' +
+        '<td align="right" valign="middle">' +
+          '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
+            '<td bgcolor="#1E273B" onclick="window.BGM_APP.openDetail(' + item.id + ')"><table border="0" cellpadding="2" cellspacing="0"><tr><td><font size="1" color="' + typeColor + '"><b>&nbsp;详情&nbsp;</b></font></td></tr></table></td>' +
+            '<td width="6">' + spacerImg(6, 1) + '</td>' +
+            '<td bgcolor="#1B2233" onclick="window.BGM_APP.openSubjectBgm(' + item.id + ')"><table border="0" cellpadding="2" cellspacing="0"><tr><td><font size="1" color="' + THEME.textMuted + '"><b>&nbsp;BGM ↗&nbsp;</b></font></td></tr></table></td>' +
+          '</tr></table>' +
         '</td>' +
       '</tr></table>';
 
@@ -966,7 +978,7 @@
           if (rowParts[c]) {
             var cHtml = rowParts[c].hasComment
               ? rowParts[c].comment
-              : '<table width="100%" border="0" cellpadding="7" cellspacing="0"><tr><td><font size="1" color="' + THEME.textDim + '">—</font></td></tr></table>';
+              : '<table width="100%" border="0" cellpadding="7" cellspacing="0"><tr><td><font size="1" color="' + THEME.textDim + '">&nbsp;</font></td></tr></table>';
             html += '<td width="1" bgcolor="' + THEME.border + '"></td><td' + rowParts[c].widthAttr + ' bgcolor="' + THEME.bgElevated + '" valign="middle">' + cHtml + '</td><td width="1" bgcolor="' + THEME.border + '"></td>';
           } else {
             html += '<td colspan="3"></td>';
@@ -1059,7 +1071,7 @@
             '<table border="0" cellpadding="6" cellspacing="0"><tr><td><font size="1" color="' + (trimStr(it.c) ? THEME.textMain : THEME.textDim) + '">' + (trimStr(it.c) ? escHtml(it.c) : '-') + '</font></td></tr></table>' +
           '</td>' +
           '<td align="center" valign="middle">' +
-            '<a href="https://bgm.tv/subject/' + it.id + '" target="_blank"><font size="1" color="' + typeColor + '"><b>BGM ↗</b></font></a>' +
+            '<table border="0" cellpadding="2" cellspacing="0" bgcolor="#1E273B"><tr><td onclick="window.BGM_APP.openSubjectBgm(' + it.id + ')"><font size="1" color="' + typeColor + '"><b>&nbsp;BGM ↗&nbsp;</b></font></td></tr></table>' +
           '</td>' +
         '</tr>';
     }
@@ -1296,7 +1308,7 @@
           '<table width="100%" border="0" cellpadding="12" cellspacing="0"><tr>' +
             '<td>' +
               '<font size="1" color="' + THEME.textMuted + '">' +
-                '数据来源: <a href="https://bangumi.tv/user/' + USER_ID + '" target="_blank"><font color="' + THEME.pink + '">Bangumi 番组计划 (UID ' + USER_ID + ')</font></a>' +
+                '数据来源: <span onclick="window.BGM_APP.openExternal(\'https://bangumi.tv/user/' + USER_ID + '\')"><font color="' + THEME.pink + '"><b>Bangumi 番组计划 (UID ' + USER_ID + ') ↗</b></font></span>' +
                 ' · 快照时间: <font face="Consolas, monospace">' + escHtml(dataStore.synced_at || '-') + '</font>' +
               '</font>' +
             '</td>' +
@@ -1663,6 +1675,21 @@
     },
     syncNow: function () {
       syncFromBangumi(false);
+    },
+    openExternal: function (url) {
+      var u = safeUrl(url);
+      if (!u) return;
+      var win = window.open(u, '_blank');
+      if (!win) {
+        window.location.href = u;
+      }
+    },
+    openSubjectBgm: function (id) {
+      var url = 'https://bgm.tv/subject/' + id;
+      var win = window.open(url, '_blank');
+      if (!win) {
+        window.location.href = url;
+      }
     }
   };
 
