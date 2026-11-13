@@ -398,9 +398,9 @@
             '<font size="2" color="' + THEME.textMuted + '">个人动画与游戏收藏志</font><br>' +
             '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
             '<font size="1" color="' + syncDotColor + '">●</font>&nbsp;<font size="1" color="' + THEME.textMuted + '" face="Consolas, \'Courier New\', monospace">' + escHtml(syncText) + '</font><br>' +
-            '<img src="spacer.gif" width="1" height="4" border="0" alt=""><br>' +
-            '<a href="' + escHtml(safeUrl(u.url)) + '" target="_blank"><font size="1" color="' + THEME.pink + '"><b>[ Bangumi 主页 ↗ ]</b></font></a>&nbsp;&nbsp;' +
-            '<a href="javascript:void(0)" onclick="window.BGM_APP.syncNow(); return false;"><font size="1" color="' + THEME.cyan + '"><b>[ ↻ 实时同步 ]</b></font></a>' +
+            '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
+            '<a href="' + escHtml(safeUrl(u.url)) + '" target="_blank"><font size="1" color="' + THEME.pink + '"><b>Bangumi 个人主页 ↗</b></font></a>&nbsp;&nbsp;&nbsp;' +
+            '<button type="button" onclick="window.BGM_APP.syncNow()">↻ 实时同步</button>' +
           '</td>' +
         '</tr>' +
       '</table>';
@@ -485,14 +485,12 @@
       var topLine = active ? tb.color : THEME.border;
 
       html +=
-        '<td width="25%" bgcolor="' + bg + '" align="center" valign="middle">' +
+        '<td width="25%" bgcolor="' + bg + '" align="center" valign="middle" onclick="window.BGM_APP.setMode(\'' + tb.id + '\')">' +
           '<table width="100%" border="0" cellpadding="0" cellspacing="0">' +
             '<tr><td height="3" bgcolor="' + tb.color + '">' + spacerImg(1, 3) + '</td></tr>' +
             '<tr><td align="center">' +
               '<table border="0" cellpadding="9" cellspacing="0"><tr><td align="center">' +
-                '<a href="#' + tb.id + '" onclick="window.BGM_APP.setMode(\'' + tb.id + '\'); return false;">' +
-                  '<font size="' + (vw < 540 ? '2' : '3') + '" color="' + fg + '"><b>' + tb.label + '</b></font>' + countStr +
-                '</a>' +
+                '<font size="' + (vw < 540 ? '2' : '3') + '" color="' + fg + '"><b>' + tb.label + '</b></font>' + countStr +
               '</td></tr></table>' +
             '</td></tr>' +
           '</table>' +
@@ -507,16 +505,14 @@
     var accent = getAccentColor(state.mode);
     var total = summary.total > 0 ? summary.total : 1;
 
-    // Status pills row
+    // Status pills row (zero underline via td onclick)
     var statusTabs = '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '"><tr>';
     var allActive = state.status === 0;
     statusTabs +=
-      '<td bgcolor="' + (allActive ? THEME.bgElevated : THEME.bgCard) + '" align="center">' +
+      '<td bgcolor="' + (allActive ? THEME.bgElevated : THEME.bgCard) + '" align="center" onclick="window.BGM_APP.setStatus(0)">' +
         '<table border="0" cellpadding="7" cellspacing="0" width="100%"><tr><td align="center">' +
-          '<a href="javascript:void(0)" onclick="window.BGM_APP.setStatus(0); return false;">' +
-            '<font size="2" color="' + (allActive ? accent : THEME.textMain) + '"><b>全部</b></font> ' +
-            '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">(' + summary.total + ')</font>' +
-          '</a>' +
+          '<font size="2" color="' + (allActive ? accent : THEME.textMain) + '"><b>全部</b></font> ' +
+          '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">(' + summary.total + ')</font>' +
         '</td></tr></table>' +
       '</td>';
 
@@ -527,13 +523,11 @@
       var lbl = getStatusLabel(stCode, state.mode);
       var cnt = summary.counts[stCode] || 0;
       statusTabs +=
-        '<td bgcolor="' + (isAct ? meta.bg : THEME.bgCard) + '" align="center">' +
+        '<td bgcolor="' + (isAct ? meta.bg : THEME.bgCard) + '" align="center" onclick="window.BGM_APP.setStatus(' + stCode + ')">' +
           '<table border="0" cellpadding="7" cellspacing="0" width="100%"><tr><td align="center">' +
-            '<a href="javascript:void(0)" onclick="window.BGM_APP.setStatus(' + stCode + '); return false;">' +
-              '<font size="1" color="' + meta.color + '">■</font> ' +
-              '<font size="2" color="' + (isAct ? meta.text : THEME.textMain) + '"><b>' + lbl + '</b></font> ' +
-              '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">(' + cnt + ')</font>' +
-            '</a>' +
+            '<font size="1" color="' + meta.color + '">■</font> ' +
+            '<font size="2" color="' + (isAct ? meta.text : THEME.textMain) + '"><b>' + lbl + '</b></font> ' +
+            '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">(' + cnt + ')</font>' +
           '</td></tr></table>' +
         '</td>';
     }
@@ -556,34 +550,46 @@
     }
     segBar += '</tr></table>';
 
-    // Popular tag chips
-    var topTags = getTopTags(pool, state.status, vw < 640 ? 10 : 16);
+    // Compact single-row hot tag chips (zero underline) + full dropdown
+    var allTags = getTopTags(pool, state.status, 30);
+    var chipTags = allTags.slice(0, vw < 640 ? 5 : 8);
     var tagRowHtml = '';
-    if (topTags.length > 0) {
-      tagRowHtml = '<table border="0" cellpadding="2" cellspacing="3"><tr><td valign="middle"><font size="1" color="' + THEME.textMuted + '"><b>热门标签:</b></font></td>';
+    if (chipTags.length > 0 || state.tag) {
+      tagRowHtml = '<table border="0" cellpadding="2" cellspacing="3"><tr><td valign="middle"><font size="1" color="' + THEME.textMuted + '"><b>快捷标签:</b></font></td>';
       if (state.tag) {
         tagRowHtml +=
-          '<td><table border="0" cellpadding="2" cellspacing="0" bgcolor="' + THEME.red + '"><tr><td>' +
-            '<a href="javascript:void(0)" onclick="window.BGM_APP.setTag(\'\'); return false;"><font size="1" color="' + THEME.ink + '"><b>&nbsp;× 清除: ' + escHtml(state.tag) + '&nbsp;</b></font></a>' +
+          '<td bgcolor="' + THEME.red + '" onclick="window.BGM_APP.setTagExact(\'\')"><table border="0" cellpadding="2" cellspacing="0"><tr><td>' +
+            '<font size="1" color="' + THEME.ink + '"><b>&nbsp;× ' + escHtml(state.tag) + '&nbsp;</b></font>' +
           '</td></tr></table></td>';
       }
-      for (i = 0; i < topTags.length; i++) {
-        var tg = topTags[i];
+      for (i = 0; i < chipTags.length; i++) {
+        var tg = chipTags[i];
         var tgAct = state.tag === tg.name;
         var tgBg = tgAct ? accent : THEME.bgAlt;
         var tgFg = tgAct ? THEME.ink : THEME.textMain;
-        if (i > 0 && i % (vw < 640 ? 5 : 9) === 0) {
-          tagRowHtml += '</tr></table><table border="0" cellpadding="2" cellspacing="3"><tr>';
-        }
         tagRowHtml +=
-          '<td><table border="0" cellpadding="2" cellspacing="0" bgcolor="' + tgBg + '"><tr><td>' +
-            '<a href="javascript:void(0)" onclick="window.BGM_APP.setTag(\'' + escJsStr(tg.name) + '\'); return false;">' +
-              '<font size="1" color="' + tgFg + '">&nbsp;' + escHtml(tg.name) + ' <font color="' + (tgAct ? THEME.ink : THEME.textDim) + '">(' + tg.count + ')</font>&nbsp;</font>' +
-            '</a>' +
+          '<td bgcolor="' + tgBg + '" onclick="window.BGM_APP.setTag(\'' + escJsStr(tg.name) + '\')"><table border="0" cellpadding="2" cellspacing="0"><tr><td>' +
+            '<font size="1" color="' + tgFg + '">&nbsp;' + escHtml(tg.name) + ' <font color="' + (tgAct ? THEME.ink : THEME.textDim) + '">(' + tg.count + ')</font>&nbsp;</font>' +
           '</td></tr></table></td>';
       }
       tagRowHtml += '</tr></table>';
     }
+
+    var tagSelect = '<select id="ctrl-tag" onchange="window.BGM_APP.setTagExact(this.value)"><option value="">全部标签</option>';
+    for (i = 0; i < allTags.length; i++) {
+      var optTg = allTags[i];
+      tagSelect += '<option value="' + escHtml(optTg.name) + '"' + (state.tag === optTg.name ? ' selected' : '') + '>' + escHtml(optTg.name) + ' (' + optTg.count + ')</option>';
+    }
+    if (state.tag) {
+      var foundTag = false;
+      for (i = 0; i < allTags.length; i++) {
+        if (allTags[i].name === state.tag) { foundTag = true; break; }
+      }
+      if (!foundTag) {
+        tagSelect += '<option value="' + escHtml(state.tag) + '" selected>' + escHtml(state.tag) + '</option>';
+      }
+    }
+    tagSelect += '</select>';
 
     // Search + Sort + Filter + View Toolbar
     var rateOpts = [
@@ -627,14 +633,14 @@
     var gridActive = state.view === 'grid';
     var viewSwitch =
       '<table border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.borderStrong + '"><tr>' +
-        '<td bgcolor="' + (gridActive ? accent : THEME.bgCard) + '">' +
-          '<table border="0" cellpadding="4" cellspacing="0"><tr><td>' +
-            '<a href="javascript:void(0)" onclick="window.BGM_APP.setView(\'grid\'); return false;"><font size="1" color="' + (gridActive ? THEME.ink : THEME.textMain) + '"><b>&nbsp;▦ 画廊卡片&nbsp;</b></font></a>' +
+        '<td bgcolor="' + (gridActive ? accent : THEME.bgCard) + '" onclick="window.BGM_APP.setView(\'grid\')">' +
+          '<table border="0" cellpadding="5" cellspacing="0"><tr><td>' +
+            '<font size="1" color="' + (gridActive ? THEME.ink : THEME.textMain) + '"><b>&nbsp;▦ 画廊卡片&nbsp;</b></font>' +
           '</td></tr></table>' +
         '</td>' +
-        '<td bgcolor="' + (!gridActive ? accent : THEME.bgCard) + '">' +
-          '<table border="0" cellpadding="4" cellspacing="0"><tr><td>' +
-            '<a href="javascript:void(0)" onclick="window.BGM_APP.setView(\'table\'); return false;"><font size="1" color="' + (!gridActive ? THEME.ink : THEME.textMain) + '"><b>&nbsp;☰ 档案表格&nbsp;</b></font></a>' +
+        '<td bgcolor="' + (!gridActive ? accent : THEME.bgCard) + '" onclick="window.BGM_APP.setView(\'table\')">' +
+          '<table border="0" cellpadding="5" cellspacing="0"><tr><td>' +
+            '<font size="1" color="' + (!gridActive ? THEME.ink : THEME.textMain) + '"><b>&nbsp;☰ 档案表格&nbsp;</b></font>' +
           '</td></tr></table>' +
         '</td>' +
       '</tr></table>';
@@ -649,10 +655,10 @@
                   '<tr>' +
                     '<td valign="middle">' +
                       '<font size="2" color="' + THEME.textMuted + '"><b>检索:</b></font> ' +
-                      '<input type="text" id="ctrl-query" size="' + (vw < 640 ? '16' : '24') + '" value="' + escHtml(state.query) + '" placeholder="标题 / 原名 / 短评 / 标签"> ' +
+                      '<input type="text" id="ctrl-query" size="' + (vw < 640 ? '14' : '20') + '" value="' + escHtml(state.query) + '" placeholder="标题 / 原名 / 短评 / 标签"> ' +
                       '<button type="submit">搜索</button> ' +
                       '<button type="button" onclick="window.BGM_APP.resetFilters()">重置</button> ' +
-                      '&nbsp;' + rateSelect + ' ' + sortSelect + ' ' + sizeSelect +
+                      '&nbsp;' + tagSelect + ' ' + rateSelect + ' ' + sortSelect + ' ' + sizeSelect +
                     '</td>' +
                     '<td align="right" valign="middle">' + viewSwitch + '</td>' +
                   '</tr>' +
@@ -666,7 +672,7 @@
                   (state.tag ? ' · 标签 [<font color="' + accent + '">' + escHtml(state.tag) + '</font>]' : '') +
                   (state.query ? ' · 关键词 [<font color="' + accent + '">' + escHtml(state.query) + '</font>]' : '') +
                 '</font></td>' +
-                '<td align="right"><font size="1" color="' + THEME.textDim + '">点击任意作品标题可展开详情档案</font></td>' +
+                '<td align="right"><font size="1" color="' + THEME.textDim + '">点击封面或标题查看详情档案</font></td>' +
               '</tr></table>' +
             '</td></tr>' +
           '</table>' +
@@ -690,10 +696,8 @@
       for (var i = 0; i < item.tags.length; i++) {
         var tg = item.tags[i];
         tagsHtml +=
-          '<td><table border="0" cellpadding="2" cellspacing="0" bgcolor="' + THEME.bgAlt + '"><tr><td>' +
-            '<a href="javascript:void(0)" onclick="window.BGM_APP.jumpToTag(' + item.st + ', \'' + escJsStr(tg) + '\'); return false;">' +
-              '<font size="1" color="' + accent + '">&nbsp;#' + escHtml(tg) + '&nbsp;</font>' +
-            '</a>' +
+          '<td bgcolor="' + THEME.bgAlt + '" onclick="window.BGM_APP.jumpToTag(' + item.st + ', \'' + escJsStr(tg) + '\')"><table border="0" cellpadding="2" cellspacing="0"><tr><td>' +
+            '<font size="1" color="' + accent + '">&nbsp;#' + escHtml(tg) + '&nbsp;</font>' +
           '</td></tr></table></td>';
       }
       tagsHtml += '</tr></table>';
@@ -727,8 +731,8 @@
               '<table width="100%" border="0" cellpadding="10" cellspacing="0"><tr>' +
                 '<td><font size="2" color="' + accent + '" face="Consolas, monospace"><b>SUBJECT DOSSIER // #' + item.id + ' · ' + (item.st === 4 ? 'GAME' : 'ANIME') + '</b></font></td>' +
                 '<td align="right">' +
-                  '<a href="https://bgm.tv/subject/' + item.id + '" target="_blank"><font size="2" color="' + accent + '"><b>[ 在 Bangumi 打开 ↗ ]</b></font></a>&nbsp;&nbsp;' +
-                  '<a href="javascript:void(0)" onclick="window.BGM_APP.closeDetail(); return false;"><font size="2" color="' + THEME.red + '"><b>[ × 关闭详情 ]</b></font></a>' +
+                  '<a href="https://bgm.tv/subject/' + item.id + '" target="_blank"><font size="2" color="' + accent + '"><b>在 Bangumi 打开 ↗</b></font></a>&nbsp;&nbsp;&nbsp;' +
+                  '<button type="button" onclick="window.BGM_APP.closeDetail()">× 关闭详情</button>' +
                 '</td>' +
               '</tr></table>' +
             '</td></tr>' +
@@ -764,14 +768,21 @@
     );
   }
 
-  function renderCard(item) {
+  function truncateStr(s, maxLen) {
+    var str = trimStr(s);
+    if (str.length <= maxLen) return str;
+    return str.slice(0, maxLen - 1) + '…';
+  }
+
+  function renderCardParts(item, contentW) {
     var stMeta = STATUS_META[item.t] || STATUS_META[2];
     var stLabel = getStatusLabel(item.t, item.st);
     var typeTag = item.st === 4 ? 'GAME' : 'ANIME';
     var typeColor = item.st === 4 ? THEME.blue : THEME.pink;
     var scColors = getScoreColors(item.r);
-    var titleMain = item.cn || item.n || ('#' + item.id);
-    var titleSub = (item.cn && item.n && item.cn !== item.n) ? item.n : '';
+    var titleMain = truncateStr(item.cn || item.n || ('#' + item.id), 28);
+    var rawSub = (item.cn && item.n && item.cn !== item.n) ? item.n : '';
+    var titleSub = truncateStr(rawSub, 30);
     var hasComment = trimStr(item.c).length > 0;
 
     // Progress row for anime/episodic works
@@ -784,95 +795,89 @@
         barHtml(pct, 4, THEME.cyan, THEME.bgDeep);
     }
 
-    // Tags (up to 3)
+    // Tags (up to 3, truncated cleanly so width never overflows)
     var tagsHtml = '';
     if (item.tags && item.tags.length > 0) {
-      var lim = Math.min(3, item.tags.length);
       tagsHtml = '<table border="0" cellpadding="1" cellspacing="2"><tr>';
-      for (var i = 0; i < lim; i++) {
+      var usedChars = 0;
+      var shown = 0;
+      for (var i = 0; i < item.tags.length && shown < 3; i++) {
+        var tgText = truncateStr(item.tags[i], 9);
+        if (shown > 0 && usedChars + tgText.length > 16) break;
+        usedChars += tgText.length;
+        shown++;
         tagsHtml +=
           '<td bgcolor="' + THEME.bgElevated + '">' +
-            '<a href="javascript:void(0)" onclick="window.BGM_APP.setTag(\'' + escJsStr(item.tags[i]) + '\'); return false;">' +
-              '<font size="1" color="' + THEME.textMuted + '">&nbsp;' + escHtml(item.tags[i]) + '&nbsp;</font>' +
-            '</a>' +
+            '<font size="1" color="' + THEME.textMuted + '">&nbsp;' + escHtml(tgText) + '&nbsp;</font>' +
           '</td>';
       }
       tagsHtml += '</tr></table>';
     }
 
+    var headerHtml =
+      '<table width="100%" border="0" cellpadding="8" cellspacing="0"><tr>' +
+        '<td align="left" valign="middle">' +
+          '<table border="0" cellpadding="0" cellspacing="2"><tr>' +
+            '<td>' + badgeHtml(stLabel, stMeta.bg, stMeta.text, false) + '</td>' +
+            (state.mode === 'all' ? '<td>' + badgeHtml(typeTag, THEME.bgElevated, typeColor, true) + '</td>' : '') +
+          '</tr></table>' +
+        '</td>' +
+        '<td align="right" valign="middle">' +
+          badgeHtml(item.r > 0 ? ('★ ' + item.r) : '未评', scColors.bg, scColors.fg, true) +
+        '</td>' +
+      '</tr></table>';
+
+    var bodyHtml =
+      '<table width="100%" border="0" cellpadding="8" cellspacing="0"><tr>' +
+        '<td width="88" height="124" valign="middle" align="center" bgcolor="' + THEME.bgDeep + '" onclick="window.BGM_APP.openDetail(' + item.id + ')">' +
+          (item.img ? '<img src="' + escHtml(safeUrl(item.img)) + '" width="82" border="0" alt="' + escHtml(titleMain) + '">' : '<font size="1" color="' + THEME.textDim + '">无图</font>') +
+        '</td>' +
+        '<td width="8">' + spacerImg(8, 124) + '</td>' +
+        '<td valign="top">' +
+          '<span onclick="window.BGM_APP.openDetail(' + item.id + ')">' +
+            '<font size="3" color="' + THEME.textMain + '"><b>' + escHtml(titleMain) + '</b></font>' +
+          '</span><br>' +
+          (titleSub ? '<font size="1" color="' + THEME.textMuted + '">' + escHtml(titleSub) + '</font><br>' : '') +
+          '<img src="spacer.gif" width="1" height="5" border="0" alt=""><br>' +
+          '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">' +
+            (item.d ? escHtml(item.d) : '未知日期') +
+            (item.sc > 0 ? ' · BGM <font color="' + THEME.amber + '"><b>' + item.sc + '</b></font>' : '') +
+            (item.rk > 0 ? ' · <font color="' + THEME.textDim + '">#' + item.rk + '</font>' : '') +
+          '</font><br>' +
+          progHtml +
+          '<img src="spacer.gif" width="1" height="5" border="0" alt=""><br>' +
+          tagsHtml +
+        '</td>' +
+      '</tr></table>';
+
     var commentHtml = '';
     if (hasComment) {
       commentHtml =
-        '<tr><td bgcolor="' + THEME.bgElevated + '">' +
-          '<table width="100%" border="0" cellpadding="7" cellspacing="0"><tr><td>' +
-            '<font size="1" color="' + typeColor + '"><b>💬</b></font> ' +
-            '<font size="1" color="' + THEME.textMain + '">' + escHtml(item.c) + '</font>' +
-          '</td></tr></table>' +
-        '</td></tr>';
+        '<table width="100%" border="0" cellpadding="7" cellspacing="0"><tr><td>' +
+          '<font size="1" color="' + typeColor + '"><b>💬</b></font> ' +
+          '<font size="1" color="' + THEME.textMain + '">' + escHtml(truncateStr(item.c, 46)) + '</font>' +
+        '</td></tr></table>';
     }
 
-    return (
-      '<table width="100%" height="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">' +
-        '<tr><td bgcolor="' + THEME.bgCard + '" valign="top">' +
-          '<table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0">' +
-            // Top color strip
-            '<tr><td height="3" bgcolor="' + stMeta.color + '">' + spacerImg(1, 3) + '</td></tr>' +
-            // Card Header: status + type + personal score
-            '<tr><td valign="top">' +
-              '<table width="100%" border="0" cellpadding="8" cellspacing="0"><tr>' +
-                '<td align="left" valign="middle">' +
-                  '<table border="0" cellpadding="0" cellspacing="2"><tr>' +
-                    '<td>' + badgeHtml(stLabel, stMeta.bg, stMeta.text, false) + '</td>' +
-                    (state.mode === 'all' ? '<td>' + badgeHtml(typeTag, THEME.bgElevated, typeColor, true) + '</td>' : '') +
-                  '</tr></table>' +
-                '</td>' +
-                '<td align="right" valign="middle">' +
-                  badgeHtml(item.r > 0 ? ('★ ' + item.r) : '未评', scColors.bg, scColors.fg, true) +
-                '</td>' +
-              '</tr></table>' +
-            '</td></tr>' +
-            // Body: Cover + Info
-            '<tr><td valign="top" height="100%">' +
-              '<table width="100%" border="0" cellpadding="8" cellspacing="0"><tr>' +
-                '<td width="92" valign="top" align="center">' +
-                  '<table border="0" cellpadding="2" cellspacing="0" bgcolor="' + THEME.bgDeep + '"><tr><td align="center">' +
-                    '<a href="#subject=' + item.id + '" onclick="window.BGM_APP.openDetail(' + item.id + '); return false;">' +
-                      (item.img ? '<img src="' + escHtml(safeUrl(item.img)) + '" width="88" border="0" alt="' + escHtml(titleMain) + '">' : '<font size="1" color="' + THEME.textDim + '">无图</font>') +
-                    '</a>' +
-                  '</td></tr></table>' +
-                '</td>' +
-                '<td valign="top">' +
-                  '<a href="#subject=' + item.id + '" onclick="window.BGM_APP.openDetail(' + item.id + '); return false;">' +
-                    '<font size="3" color="' + THEME.textMain + '"><b>' + escHtml(titleMain) + '</b></font>' +
-                  '</a><br>' +
-                  (titleSub ? '<font size="1" color="' + THEME.textMuted + '">' + escHtml(titleSub) + '</font><br>' : '') +
-                  '<img src="spacer.gif" width="1" height="5" border="0" alt=""><br>' +
-                  '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">' +
-                    (item.d ? escHtml(item.d) : '未知日期') +
-                    (item.sc > 0 ? ' · BGM <font color="' + THEME.amber + '"><b>' + item.sc + '</b></font>' : '') +
-                    (item.rk > 0 ? ' · <font color="' + THEME.textDim + '">#' + item.rk + '</font>' : '') +
-                  '</font><br>' +
-                  progHtml +
-                  '<img src="spacer.gif" width="1" height="5" border="0" alt=""><br>' +
-                  tagsHtml +
-                '</td>' +
-              '</tr></table>' +
-            '</td></tr>' +
-            commentHtml +
-            // Footer
-            '<tr><td bgcolor="' + THEME.bgAlt + '" valign="bottom">' +
-              '<table width="100%" border="0" cellpadding="6" cellspacing="0"><tr>' +
-                '<td><font size="1" color="' + THEME.textDim + '" face="Consolas, monospace">更新 ' + escHtml(item.u || '-') + '</font></td>' +
-                '<td align="right">' +
-                  '<a href="#subject=' + item.id + '" onclick="window.BGM_APP.openDetail(' + item.id + '); return false;"><font size="1" color="' + typeColor + '"><b>[详情]</b></font></a>&nbsp;' +
-                  '<a href="https://bgm.tv/subject/' + item.id + '" target="_blank"><font size="1" color="' + THEME.textMuted + '">[BGM ↗]</font></a>' +
-                '</td>' +
-              '</tr></table>' +
-            '</td></tr>' +
-          '</table>' +
-        '</td></tr>' +
-      '</table>'
-    );
+    var footerHtml =
+      '<table width="100%" border="0" cellpadding="6" cellspacing="0"><tr>' +
+        '<td><font size="1" color="' + THEME.textDim + '" face="Consolas, monospace">更新 ' + escHtml(item.u || '-') + '</font></td>' +
+        '<td align="right">' +
+          '<span onclick="window.BGM_APP.openDetail(' + item.id + ')"><font size="1" color="' + typeColor + '"><b>详情</b></font></span>' +
+          '<font size="1" color="' + THEME.textDim + '"> · </font>' +
+          '<a href="https://bgm.tv/subject/' + item.id + '" target="_blank"><font size="1" color="' + THEME.textMuted + '">BGM ↗</font></a>' +
+        '</td>' +
+      '</tr></table>';
+
+    return {
+      topColor: stMeta.color,
+      header: headerHtml,
+      body: bodyHtml,
+      hasComment: hasComment,
+      comment: commentHtml,
+      footer: footerHtml,
+      widthAttr: contentW > 0 ? (' width="' + contentW + '"') : ''
+    };
   }
 
   function renderGrid(items, vw) {
@@ -880,25 +885,117 @@
       return renderEmptyState();
     }
     var cols = getGridCols(vw);
-    var colPct = cols === 3 ? '32%' : (cols === 2 ? '49%' : '100%');
+    var isFixedDesktop = (cols === 3 && vw >= 1140);
+    var contentW = isFixedDesktop ? 350 : 0; // 3 * (350 + 2 borders) + 2 * 12 gutter = 1080 exact!
+    var gutterW = 12;
+    var totalTableCols = cols * 3 + (cols - 1);
+
     var html = '<table width="100%" border="0" cellpadding="0" cellspacing="0">';
+
+    // Column width strut row to lock identical card widths
+    html += '<tr>';
+    for (var c = 0; c < cols; c++) {
+      if (c > 0) html += '<td width="' + gutterW + '">' + spacerImg(gutterW, 1) + '</td>';
+      if (isFixedDesktop) {
+        html += '<td width="1">' + spacerImg(1, 1) + '</td><td width="' + contentW + '">' + spacerImg(contentW, 1) + '</td><td width="1">' + spacerImg(1, 1) + '</td>';
+      } else {
+        var pctW = cols === 2 ? '49%' : '100%';
+        html += '<td width="1">' + spacerImg(1, 1) + '</td><td width="' + pctW + '">' + spacerImg(1, 1) + '</td><td width="1">' + spacerImg(1, 1) + '</td>';
+      }
+    }
+    html += '</tr>';
+
     for (var i = 0; i < items.length; i += cols) {
       if (i > 0) {
-        html += '<tr><td colspan="' + (cols * 2 - 1) + '" height="10">' + spacerImg(1, 10) + '</td></tr>';
+        html += '<tr><td colspan="' + totalTableCols + '" height="12">' + spacerImg(1, 12) + '</td></tr>';
       }
-      html += '<tr>';
-      for (var c = 0; c < cols; c++) {
-        if (c > 0) {
-          html += '<td width="10">' + spacerImg(10, 1) + '</td>';
-        }
+      var rowParts = [];
+      var anyComment = false;
+      for (c = 0; c < cols; c++) {
         var idx = i + c;
-        html += '<td width="' + colPct + '" valign="top">';
         if (idx < items.length) {
-          html += renderCard(items[idx]);
+          var p = renderCardParts(items[idx], contentW);
+          if (p.hasComment) anyComment = true;
+          rowParts.push(p);
         } else {
-          html += '&nbsp;';
+          rowParts.push(null);
         }
-        html += '</td>';
+      }
+
+      // 1. Top 3px accent strip
+      html += '<tr>';
+      for (c = 0; c < cols; c++) {
+        if (c > 0) html += '<td width="' + gutterW + '"></td>';
+        if (rowParts[c]) {
+          html += '<td colspan="3" height="3" bgcolor="' + rowParts[c].topColor + '">' + spacerImg(1, 3) + '</td>';
+        } else {
+          html += '<td colspan="3" height="3"></td>';
+        }
+      }
+      html += '</tr>';
+
+      // 2. Card Header (Status + Score)
+      html += '<tr>';
+      for (c = 0; c < cols; c++) {
+        if (c > 0) html += '<td></td>';
+        if (rowParts[c]) {
+          html += '<td width="1" bgcolor="' + THEME.border + '"></td><td' + rowParts[c].widthAttr + ' bgcolor="' + THEME.bgCard + '" valign="middle">' + rowParts[c].header + '</td><td width="1" bgcolor="' + THEME.border + '"></td>';
+        } else {
+          html += '<td colspan="3"></td>';
+        }
+      }
+      html += '</tr>';
+
+      // 3. Card Body (Automatically equal height across all cards in this row!)
+      html += '<tr>';
+      for (c = 0; c < cols; c++) {
+        if (c > 0) html += '<td></td>';
+        if (rowParts[c]) {
+          html += '<td width="1" bgcolor="' + THEME.border + '"></td><td' + rowParts[c].widthAttr + ' bgcolor="' + THEME.bgCard + '" valign="top">' + rowParts[c].body + '</td><td width="1" bgcolor="' + THEME.border + '"></td>';
+        } else {
+          html += '<td colspan="3"></td>';
+        }
+      }
+      html += '</tr>';
+
+      // 4. Synchronized Comment Row (if any card in row has a comment)
+      if (anyComment) {
+        html += '<tr>';
+        for (c = 0; c < cols; c++) {
+          if (c > 0) html += '<td></td>';
+          if (rowParts[c]) {
+            var cHtml = rowParts[c].hasComment
+              ? rowParts[c].comment
+              : '<table width="100%" border="0" cellpadding="7" cellspacing="0"><tr><td><font size="1" color="' + THEME.textDim + '">—</font></td></tr></table>';
+            html += '<td width="1" bgcolor="' + THEME.border + '"></td><td' + rowParts[c].widthAttr + ' bgcolor="' + THEME.bgElevated + '" valign="middle">' + cHtml + '</td><td width="1" bgcolor="' + THEME.border + '"></td>';
+          } else {
+            html += '<td colspan="3"></td>';
+          }
+        }
+        html += '</tr>';
+      }
+
+      // 5. Card Footer (Synchronized baseline!)
+      html += '<tr>';
+      for (c = 0; c < cols; c++) {
+        if (c > 0) html += '<td></td>';
+        if (rowParts[c]) {
+          html += '<td width="1" bgcolor="' + THEME.border + '"></td><td' + rowParts[c].widthAttr + ' bgcolor="' + THEME.bgAlt + '" valign="middle">' + rowParts[c].footer + '</td><td width="1" bgcolor="' + THEME.border + '"></td>';
+        } else {
+          html += '<td colspan="3"></td>';
+        }
+      }
+      html += '</tr>';
+
+      // 6. Bottom 1px border
+      html += '<tr>';
+      for (c = 0; c < cols; c++) {
+        if (c > 0) html += '<td></td>';
+        if (rowParts[c]) {
+          html += '<td colspan="3" height="1" bgcolor="' + THEME.border + '">' + spacerImg(1, 1) + '</td>';
+        } else {
+          html += '<td colspan="3" height="1"></td>';
+        }
       }
       html += '</tr>';
     }
@@ -942,7 +1039,7 @@
           '<td valign="middle">' +
             '<table border="0" cellpadding="6" cellspacing="0"><tr><td>' +
               (state.mode === 'all' ? '<font size="1" color="' + typeColor + '" face="Consolas, monospace"><b>[' + (it.st === 4 ? 'GAME' : 'ANIME') + ']</b></font> ' : '') +
-              '<a href="#subject=' + it.id + '" onclick="window.BGM_APP.openDetail(' + it.id + '); return false;"><font size="2" color="' + THEME.textMain + '"><b>' + escHtml(mainTitle) + '</b></font></a>' +
+              '<span onclick="window.BGM_APP.openDetail(' + it.id + ')"><font size="2" color="' + THEME.textMain + '"><b>' + escHtml(mainTitle) + '</b></font></span>' +
               (subTitle ? '<br><font size="1" color="' + THEME.textMuted + '">' + escHtml(subTitle) + '</font>' : '') +
             '</td></tr></table>' +
           '</td>' +
@@ -1003,10 +1100,8 @@
     function pageBtn(label, targetPage, disabled, active) {
       var bg = active ? accent : (disabled ? THEME.bgCard : THEME.bgAlt);
       var fg = active ? THEME.ink : (disabled ? THEME.textDim : THEME.textMain);
-      var inner = disabled
-        ? '<font size="1" color="' + fg + '" face="Consolas, monospace"><b>&nbsp;' + label + '&nbsp;</b></font>'
-        : '<a href="javascript:void(0)" onclick="window.BGM_APP.setPage(' + targetPage + '); return false;"><font size="1" color="' + fg + '" face="Consolas, monospace"><b>&nbsp;' + label + '&nbsp;</b></font></a>';
-      return '<td bgcolor="' + bg + '"><table border="0" cellpadding="4" cellspacing="0"><tr><td>' + inner + '</td></tr></table></td>';
+      var clickAttr = disabled ? '' : (' onclick="window.BGM_APP.setPage(' + targetPage + ')"');
+      return '<td bgcolor="' + bg + '"' + clickAttr + '><table border="0" cellpadding="5" cellspacing="0"><tr><td><font size="1" color="' + fg + '" face="Consolas, monospace"><b>&nbsp;' + label + '&nbsp;</b></font></td></tr></table></td>';
     }
 
     html += pageBtn('« 首页', 1, cur <= 1, false);
@@ -1140,7 +1235,7 @@
       tagRows +=
         '<tr>' +
           '<td width="24" align="right"><font size="1" color="' + THEME.textDim + '" face="Consolas, monospace">' + (i + 1) + '</font></td>' +
-          '<td width="110"><a href="javascript:void(0)" onclick="window.BGM_APP.jumpToTag(0, \'' + escJsStr(tg.name) + '\'); return false;"><font size="2" color="' + THEME.emerald + '"><b>' + escHtml(tg.name) + '</b></font></a></td>' +
+          '<td width="110" onclick="window.BGM_APP.jumpToTag(0, \'' + escJsStr(tg.name) + '\')"><font size="2" color="' + THEME.emerald + '"><b>' + escHtml(tg.name) + '</b></font></td>' +
           '<td>' + barHtml(tPct, 8, THEME.emerald, THEME.bgDeep) + '</td>' +
           '<td width="44" align="right"><font size="1" color="' + THEME.textMain + '" face="Consolas, monospace"><b>' + tg.count + '</b></font></td>' +
         '</tr>';
@@ -1517,6 +1612,11 @@
     },
     setTag: function (tg) {
       state.tag = (state.tag === tg) ? '' : tg;
+      state.page = 1;
+      render();
+    },
+    setTagExact: function (tg) {
+      state.tag = tg || '';
       state.page = 1;
       render();
     },
