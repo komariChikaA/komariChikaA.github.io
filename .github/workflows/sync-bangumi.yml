@@ -21,14 +21,14 @@ jobs:
           python-version: '3.12'
 
       - name: Fetch latest Bangumi data
-        run: python scripts/fetch_bangumi.py data.js
+        run: python scripts/fetch_bangumi.py data/bangumi_data.js
 
       - name: Commit updated snapshot if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet data.js; then
-            git add data.js
+          if ! git diff --quiet data/bangumi_data.js; then
+            git add data/bangumi_data.js
             git commit -m "chore: sync Bangumi snapshot"
             git push
           else

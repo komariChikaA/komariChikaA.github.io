@@ -1,5 +1,7 @@
 /* Shared ES3/ES5 UI Chrome & Helpers (Zero CSS, Backwards-Compatible) */
 (function () {
+  var SPACER_SRC = 'assets/img/spacer.gif';
+
   var THEME = {
     bgPage: '#0B0E14',
     bgCard: '#131722',
@@ -49,7 +51,7 @@
   function safeUrl(u) {
     if (!u) return '';
     var s = trimStr(u);
-    if (s.indexOf('https://') === 0 || s.indexOf('http://') === 0) return s;
+    if (s.indexOf('https://') === 0 || s.indexOf('http://') === 0 || s.indexOf('assets/') === 0) return s;
     return '';
   }
 
@@ -85,7 +87,7 @@
   }
 
   function spacerImg(w, h) {
-    return '<img src="spacer.gif" width="' + w + '" height="' + h + '" align="left" border="0" alt="">';
+    return '<img src="' + SPACER_SRC + '" width="' + w + '" height="' + h + '" align="left" border="0" alt="">';
   }
 
   function barHtml(pct, heightPx, fillColor, trackColor) {
@@ -121,6 +123,18 @@
     );
   }
 
+  function framedImageHtml(src, w, h, borderColor, altText, onclickCode) {
+    var imgTag = w > 0
+      ? ('<img src="' + escHtml(safeUrl(src)) + '" width="' + w + '" height="' + h + '" border="0" alt="' + escHtml(altText || '') + '">')
+      : ('<img src="' + escHtml(safeUrl(src)) + '" width="100%" border="0" alt="' + escHtml(altText || '') + '">');
+    var tdClick = onclickCode ? (' onclick="' + onclickCode + '"') : '';
+    return (
+      '<table border="0" cellpadding="1" cellspacing="0" bgcolor="' + (borderColor || THEME.border) + '"><tr>' +
+        '<td bgcolor="' + THEME.bgDeep + '"' + tdClick + '>' + imgTag + '</td>' +
+      '</tr></table>'
+    );
+  }
+
   function openExternal(url) {
     var u = safeUrl(url);
     if (!u) return;
@@ -133,7 +147,7 @@
   }
 
   function renderSiteHeader(activePage, vw) {
-    var isCompact = vw < 720;
+    var isCompact = vw < 760;
     var bgmData = window.BGM_ARCHIVE_DATA || {};
     var user = bgmData.user || {};
     var avatar = user.avatar || 'https://lain.bgm.tv/pic/user/l/000/99/36/993671.jpg?r=1744245631&hd=1';
@@ -150,7 +164,7 @@
         '</td>' +
         '<td width="12">' + spacerImg(12, 1) + '</td>' +
         '<td valign="middle">' +
-          '<font size="1" color="' + THEME.pink + '" face="Consolas, \'Courier New\', monospace"><b>GURANIREI // KOMARICHIKAA</b></font><br>' +
+          '<font size="1" color="' + THEME.pink + '" face="Consolas, \'Courier New\', monospace"><b>GURANIREI // KOMARICHIKAA.GITHUB.IO</b></font><br>' +
           '<font size="4" color="' + THEME.textMain + '"><b>GuraNirei 的个人空间与作品志</b></font><br>' +
           '<font size="1" color="' + THEME.textMuted + '">Galgame 工具 · MAD 分镜 · 联机应用 · Bangumi 收藏</font>' +
         '</td>' +
@@ -159,8 +173,9 @@
     var linksCell =
       '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
         '<td>' + pillButtonHtml('GitHub @komariChikaA ↗', '#1E273B', THEME.blue, "window.SITE_COMMON.openExternal('https://github.com/komariChikaA')", true) + '</td>' +
-        '<td width="8">' + spacerImg(8, 1) + '</td>' +
+        '<td width="6">' + spacerImg(6, 1) + '</td>' +
         '<td>' + pillButtonHtml('Bangumi #993671 ↗', '#261821', THEME.pink, "window.SITE_COMMON.openExternal('https://bangumi.tv/user/993671')", true) + '</td>' +
+        (vw >= 920 ? '<td width="6">' + spacerImg(6, 1) + '</td><td>' + pillButtonHtml('笔记站 my-notes ↗', '#1C1930', THEME.violet, "window.SITE_COMMON.openExternal('https://komarichikaa.github.io/my-notes/')", true) + '</td>' : '') +
       '</tr></table>';
 
     var topBar =
@@ -204,12 +219,12 @@
     }
     navHtml += '</tr></table>';
 
-    return topBar + '<img src="spacer.gif" width="1" height="8" border="0" alt=""><br>' + navHtml;
+    return topBar + '<img src="' + SPACER_SRC + '" width="1" height="8" border="0" alt=""><br>' + navHtml;
   }
 
   function renderSiteFooter() {
     return (
-      '<img src="spacer.gif" width="1" height="16" border="0" alt=""><br>' +
+      '<img src="' + SPACER_SRC + '" width="1" height="16" border="0" alt=""><br>' +
       '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">' +
         '<tr><td bgcolor="' + THEME.bgCard + '">' +
           '<table width="100%" border="0" cellpadding="12" cellspacing="0"><tr>' +
@@ -223,7 +238,7 @@
               '</font>' +
             '</td>' +
             '<td align="right">' +
-              '<font size="1" color="' + THEME.textDim + '" face="Consolas, \'Courier New\', monospace">PURE HTML + ES5 JS · ZERO CSS · MULTI-PAGE ARCHIVE</font>' +
+              '<font size="1" color="' + THEME.textDim + '" face="Consolas, \'Courier New\', monospace">KOMARICHIKAA.GITHUB.IO · PURE HTML + ES5 JS · ZERO CSS</font>' +
             '</td>' +
           '</tr></table>' +
         '</td></tr>' +
@@ -239,6 +254,7 @@
   }
 
   window.SITE_COMMON = {
+    SPACER_SRC: SPACER_SRC,
     THEME: THEME,
     trimStr: trimStr,
     escHtml: escHtml,
@@ -252,6 +268,7 @@
     barHtml: barHtml,
     badgeHtml: badgeHtml,
     pillButtonHtml: pillButtonHtml,
+    framedImageHtml: framedImageHtml,
     openExternal: openExternal,
     goPage: goPage,
     applyShellWidth: applyShellWidth,

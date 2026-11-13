@@ -2,6 +2,7 @@
 (function () {
   var C = window.SITE_COMMON;
   var THEME = C.THEME;
+  var SP = C.SPACER_SRC;
 
   var state = {
     cat: 'all',
@@ -81,6 +82,7 @@
           '<table width="100%" border="0" cellpadding="10" cellspacing="0"><tr>' +
             '<td>' +
               '<form onsubmit="window.PROJECTS_APP.applySearch(); return false;">' +
+                '<img src="assets/img/px-code.gif" width="14" height="14" border="0" align="absmiddle" alt=""> ' +
                 '<font size="2" color="' + THEME.textMuted + '"><b>检索项目:</b></font> ' +
                 '<input type="text" id="proj-query" size="' + (vw < 640 ? '16' : '28') + '" value="' + C.escHtml(state.query) + '" placeholder="名称 / 技术栈 / 关键词"> ' +
                 '<button type="submit">搜索</button> ' +
@@ -88,16 +90,36 @@
               '</form>' +
             '</td>' +
             '<td align="right">' +
-              '<font size="1" color="' + THEME.textMuted + '">展示 <font color="' + THEME.emerald + '" face="Consolas, monospace"><b>' + filteredCount + '</b></font> 个项目 · 点击标题查看技术细节</font>' +
+              '<font size="1" color="' + THEME.textMuted + '">展示 <font color="' + THEME.emerald + '" face="Consolas, monospace"><b>' + filteredCount + '</b></font> 个项目 · 点击封面或标题查看档案</font>' +
             '</td>' +
           '</tr></table>' +
         '</td></tr>' +
       '</table>';
 
-    return catTabs + '<img src="spacer.gif" width="1" height="10" border="0" alt=""><br>' + searchBar;
+    return catTabs + '<img src="' + SP + '" width="1" height="10" border="0" alt=""><br>' + searchBar;
   }
 
-  function renderProjectDossier(p) {
+  function renderProjectCoverCell(p, w, h, onclickCode) {
+    var meta = getCatMeta(p.category);
+    var inner;
+    if (p.image) {
+      inner = w > 0
+        ? '<img src="' + C.escHtml(p.image) + '" width="' + w + '" height="' + h + '" border="0" alt="">'
+        : '<img src="' + C.escHtml(p.image) + '" width="100%" border="0" alt="">';
+    } else {
+      inner =
+        '<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#0F1420">' +
+          '<tr><td height="' + (h || 180) + '" align="center" valign="middle">' +
+            '<font size="2" color="' + meta.color + '" face="Consolas, monospace"><b>' + C.escHtml(p.lang.toUpperCase()) + ' // ENGINEERING</b></font><br>' +
+            C.spacerImg(1, 4) + '<br>' +
+            '<font size="1" color="' + THEME.textDim + '">' + C.escHtml(p.categoryLabel) + '</font>' +
+          '</td></tr>' +
+        '</table>';
+    }
+    return '<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="' + THEME.bgDeep + '"><tr><td align="center" valign="middle"' + (onclickCode ? ' onclick="' + onclickCode + '"' : '') + '>' + inner + '</td></tr></table>';
+  }
+
+  function renderProjectDossier(p, vw) {
     if (!p) return '';
     var meta = getCatMeta(p.category);
     var hlHtml = '';
@@ -114,6 +136,31 @@
       tagsHtml += '<td bgcolor="' + THEME.bgAlt + '"><font size="1" color="' + meta.color + '">&nbsp;#' + C.escHtml(p.tags[i]) + '&nbsp;</font></td>';
     }
     tagsHtml += '</tr></table>';
+
+    var infoPart =
+      '<table border="0" cellpadding="0" cellspacing="4"><tr>' +
+        '<td>' + C.badgeHtml(p.categoryLabel, THEME.bgElevated, meta.color, false) + '</td>' +
+        '<td>' + C.badgeHtml(p.lang, THEME.bgAlt, THEME.textMain, true) + '</td>' +
+        (p.stars > 0 ? '<td>' + C.badgeHtml('★ ' + p.stars + ' Stars', '#2C2312', THEME.amber, true) + '</td>' : '') +
+        '<td>' + C.badgeHtml('更新 ' + p.updated, THEME.bgAlt, THEME.textMuted, true) + '</td>' +
+      '</tr></table>' +
+      C.spacerImg(1, 8) + '<br>' +
+      '<font size="5" color="' + THEME.textMain + '"><b>' + C.escHtml(p.name) + '</b></font><br>' +
+      C.spacerImg(1, 6) + '<br>' +
+      '<font size="2" color="' + THEME.textMuted + '">' + C.escHtml(p.summary) + '</font><br>' +
+      C.spacerImg(1, 10) + '<br>' +
+      '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '"><tr><td bgcolor="' + THEME.bgElevated + '">' +
+        '<table width="100%" border="0" cellpadding="10" cellspacing="4">' + hlHtml + '</table>' +
+      '</td></tr></table>' +
+      C.spacerImg(1, 8) + '<br>' +
+      tagsHtml;
+
+    var shotPart =
+      '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.borderStrong + '">' +
+        '<tr><td bgcolor="' + THEME.bgDeep + '" align="center">' +
+          renderProjectCoverCell(p, vw >= 760 ? 336 : 0, vw >= 760 ? 189 : 180, '') +
+        '</td></tr>' +
+      '</table>';
 
     return (
       '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + meta.color + '">' +
@@ -133,28 +180,15 @@
               '</tr></table>' +
             '</td></tr>' +
             '<tr><td>' +
-              '<table width="100%" border="0" cellpadding="16" cellspacing="0"><tr><td>' +
-                '<table border="0" cellpadding="0" cellspacing="4"><tr>' +
-                  '<td>' + C.badgeHtml(p.categoryLabel, THEME.bgElevated, meta.color, false) + '</td>' +
-                  '<td>' + C.badgeHtml(p.lang, THEME.bgAlt, THEME.textMain, true) + '</td>' +
-                  (p.stars > 0 ? '<td>' + C.badgeHtml('★ ' + p.stars + ' Stars', '#2C2312', THEME.amber, true) + '</td>' : '') +
-                  '<td>' + C.badgeHtml('更新 ' + p.updated, THEME.bgAlt, THEME.textMuted, true) + '</td>' +
-                '</tr></table>' +
-                '<img src="spacer.gif" width="1" height="8" border="0" alt=""><br>' +
-                '<font size="5" color="' + THEME.textMain + '"><b>' + C.escHtml(p.name) + '</b></font><br>' +
-                '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
-                '<font size="2" color="' + THEME.textMuted + '">' + C.escHtml(p.summary) + '</font><br>' +
-                '<img src="spacer.gif" width="1" height="10" border="0" alt=""><br>' +
-                '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '"><tr><td bgcolor="' + THEME.bgElevated + '">' +
-                  '<table width="100%" border="0" cellpadding="10" cellspacing="4">' + hlHtml + '</table>' +
-                '</td></tr></table>' +
-                '<img src="spacer.gif" width="1" height="8" border="0" alt=""><br>' +
-                tagsHtml +
-              '</td></tr></table>' +
+              '<table width="100%" border="0" cellpadding="16" cellspacing="0">' +
+                (vw < 760
+                  ? '<tr><td>' + shotPart + '</td></tr><tr><td height="12">' + C.spacerImg(1, 12) + '</td></tr><tr><td>' + infoPart + '</td></tr>'
+                  : '<tr><td width="340" valign="top">' + shotPart + '</td><td width="16">' + C.spacerImg(16, 1) + '</td><td valign="top">' + infoPart + '</td></tr>') +
+              '</table>' +
             '</td></tr>' +
           '</table>' +
         '</td></tr>' +
-      '</table><img src="spacer.gif" width="1" height="12" border="0" alt=""><br>'
+      '</table><img src="' + SP + '" width="1" height="12" border="0" alt=""><br>'
     );
   }
 
@@ -174,6 +208,8 @@
     var isFixed = (cols === 3 && vw >= 1140);
     var contentW = isFixed ? 350 : 0;
     var gutterW = 12;
+    var imgW = isFixed ? 350 : 0;
+    var imgH = isFixed ? 197 : 180;
     var wAttr = contentW > 0 ? (' width="' + contentW + '"') : '';
     var totalCols = cols * 3 + (cols - 1);
 
@@ -209,7 +245,25 @@
       }
       html += '</tr>';
 
-      // 2. Card Header
+      // 2. Synchronized Cover Image Row
+      html += '<tr>';
+      for (c = 0; c < cols; c++) {
+        if (c > 0) html += '<td></td>';
+        var pm = row[c];
+        if (pm) {
+          html +=
+            '<td width="1" bgcolor="' + THEME.border + '"></td>' +
+            '<td' + wAttr + ' bgcolor="' + THEME.bgDeep + '" valign="middle">' +
+              renderProjectCoverCell(pm, imgW, imgH, "window.PROJECTS_APP.openDetail('" + pm.id + "')") +
+            '</td>' +
+            '<td width="1" bgcolor="' + THEME.border + '"></td>';
+        } else {
+          html += '<td colspan="3"></td>';
+        }
+      }
+      html += '</tr>';
+
+      // 3. Card Header
       html += '<tr>';
       for (c = 0; c < cols; c++) {
         if (c > 0) html += '<td></td>';
@@ -231,7 +285,7 @@
       }
       html += '</tr>';
 
-      // 3. Card Body
+      // 4. Card Body
       html += '<tr>';
       for (c = 0; c < cols; c++) {
         if (c > 0) html += '<td></td>';
@@ -248,10 +302,10 @@
             '<td' + wAttr + ' bgcolor="' + THEME.bgCard + '" valign="top">' +
               '<table width="100%" border="0" cellpadding="10" cellspacing="0"><tr><td>' +
                 '<span onclick="window.PROJECTS_APP.openDetail(\'' + pb.id + '\')"><font size="3" color="' + THEME.textMain + '"><b>' + C.escHtml(pb.name) + '</b></font></span><br>' +
-                '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
+                C.spacerImg(1, 6) + '<br>' +
                 '<font size="2" color="' + THEME.textMuted + '">' + C.escHtml(C.truncateStr(pb.summary, 66)) + '</font><br>' +
-                '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
-                (firstPoint ? '<font size="1" color="' + THEME.textDim + '">▸ ' + C.escHtml(firstPoint) + '</font><br><img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' : '') +
+                C.spacerImg(1, 6) + '<br>' +
+                (firstPoint ? '<font size="1" color="' + THEME.textDim + '">▸ ' + C.escHtml(firstPoint) + '</font><br>' + C.spacerImg(1, 6) + '<br>' : '') +
                 tgHtml +
               '</td></tr></table>' +
             '</td>' +
@@ -262,7 +316,7 @@
       }
       html += '</tr>';
 
-      // 4. Card Footer
+      // 5. Card Footer
       html += '<tr>';
       for (c = 0; c < cols; c++) {
         if (c > 0) html += '<td></td>';
@@ -291,7 +345,7 @@
       }
       html += '</tr>';
 
-      // 5. Bottom border
+      // 6. Bottom border
       html += '<tr>';
       for (c = 0; c < cols; c++) {
         if (c > 0) html += '<td></td>';
@@ -326,10 +380,10 @@
 
     var html =
       C.renderSiteHeader('projects', vw) +
-      '<img src="spacer.gif" width="1" height="10" border="0" alt=""><br>' +
+      '<img src="' + SP + '" width="1" height="10" border="0" alt=""><br>' +
       renderFilterBar(filtered.length, vw) +
-      '<img src="spacer.gif" width="1" height="12" border="0" alt=""><br>' +
-      renderProjectDossier(selected) +
+      '<img src="' + SP + '" width="1" height="12" border="0" alt=""><br>' +
+      renderProjectDossier(selected, vw) +
       renderProjectGrid(filtered, vw) +
       C.renderSiteFooter();
 

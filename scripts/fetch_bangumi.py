@@ -8,7 +8,7 @@ import urllib.request
 from datetime import datetime, timezone, timedelta
 
 USER_ID = "993671"
-USER_AGENT = "GuraNirei-Bangumi-Archive/1.0 (https://github.com/komariChikaA)"
+USER_AGENT = "GuraNirei-Portal/1.0 (https://komarichikaa.github.io/)"
 
 
 def http_get_json(url):
@@ -100,7 +100,8 @@ def fetch_collections(user_id, subject_type):
 
 
 def main():
-    out_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", "data.js")
+    default_out = os.path.join(os.path.dirname(__file__), "..", "data", "bangumi_data.js")
+    out_path = sys.argv[1] if len(sys.argv) > 1 else default_out
     out_path = os.path.abspath(out_path)
 
     user = fetch_user(USER_ID)

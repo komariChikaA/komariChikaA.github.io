@@ -140,7 +140,7 @@
   }
 
   function spacerImg(w, h) {
-    return '<img src="spacer.gif" width="' + w + '" height="' + h + '" align="left" border="0" alt="">';
+    return '<img src="assets/img/spacer.gif" width="' + w + '" height="' + h + '" align="left" border="0" alt="">';
   }
 
   function barHtml(pct, heightPx, fillColor, trackColor) {
@@ -383,12 +383,14 @@
     }
 
     var syncSide =
-      '<font size="1" color="' + THEME.pink + '" face="Consolas, \'Courier New\', monospace"><b>BANGUMI COLLECTION // UID #' + USER_ID + '</b></font><br>' +
-      '<img src="spacer.gif" width="1" height="4" border="0" alt=""><br>' +
+      '<img src="assets/img/px-heart.gif" width="14" height="14" border="0" align="absmiddle" alt=""> <font size="1" color="' + THEME.pink + '" face="Consolas, \'Courier New\', monospace"><b>BANGUMI COLLECTION // UID #' + USER_ID + '</b></font><br>' +
+      '<img src="assets/img/spacer.gif" width="1" height="4" border="0" alt=""><br>' +
       '<font size="1" color="' + syncDotColor + '">●</font>&nbsp;<font size="1" color="' + THEME.textMuted + '" face="Consolas, \'Courier New\', monospace">' + escHtml(syncText) + '</font><br>' +
-      '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
+      '<img src="assets/img/spacer.gif" width="1" height="6" border="0" alt=""><br>' +
       '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
         '<td bgcolor="#132536" onclick="window.BGM_APP.syncNow()"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + THEME.cyan + '"><b>&nbsp;↻ 从 Bangumi 实时同步&nbsp;</b></font></td></tr></table></td>' +
+        '<td width="8">' + spacerImg(8, 1) + '</td>' +
+        '<td bgcolor="#241C3A" onclick="window.BGM_APP.randomPick()"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + THEME.violet + '"><b>&nbsp;🎲 随机抽选一部&nbsp;</b></font></td></tr></table></td>' +
       '</tr></table>';
 
     var kpiBlock =
@@ -430,7 +432,7 @@
       : ('<tr><td valign="middle">' + syncSide + '</td><td width="480" valign="middle" align="right">' + kpiBlock + '</td></tr>');
 
     var siteHeader = (window.SITE_COMMON && window.SITE_COMMON.renderSiteHeader)
-      ? (window.SITE_COMMON.renderSiteHeader('bangumi', vw) + '<img src="spacer.gif" width="1" height="10" border="0" alt=""><br>')
+      ? (window.SITE_COMMON.renderSiteHeader('bangumi', vw) + '<img src="assets/img/spacer.gif" width="1" height="10" border="0" alt=""><br>')
       : '';
 
     return (
@@ -660,7 +662,7 @@
         '</td></tr>' +
       '</table>';
 
-    return statusTabs + segBar + '<img src="spacer.gif" width="1" height="10" border="0" alt=""><br>' + toolbar;
+    return statusTabs + segBar + '<img src="assets/img/spacer.gif" width="1" height="10" border="0" alt=""><br>' + toolbar;
   }
 
   function renderDossier(item, vw) {
@@ -733,22 +735,22 @@
                     '<td>' + badgeHtml(item.r > 0 ? ('个人评分 ★ ' + item.r + '/10') : '个人未评分', scColors.bg, scColors.fg, true) + '</td>' +
                     (item.sc > 0 ? '<td>' + badgeHtml('BGM ' + item.sc + (item.rk > 0 ? (' · #' + item.rk) : ''), THEME.bgAlt, THEME.textMuted, true) + '</td>' : '') +
                   '</tr></table>' +
-                  '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
+                  '<img src="assets/img/spacer.gif" width="1" height="6" border="0" alt=""><br>' +
                   '<font size="5" color="' + THEME.textMain + '"><b>' + escHtml(item.cn || item.n) + '</b></font><br>' +
                   (item.cn && item.n && item.cn !== item.n ? '<font size="2" color="' + THEME.textMuted + '">' + escHtml(item.n) + '</font><br>' : '') +
-                  '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
+                  '<img src="assets/img/spacer.gif" width="1" height="6" border="0" alt=""><br>' +
                   '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">发行/放送日期: ' + escHtml(item.d || '未知') + ' &nbsp;|&nbsp; 收藏更新: ' + escHtml(item.u || '未知') + ' &nbsp;|&nbsp; 收藏热度: ' + (item.ct || 0) + ' 人</font><br>' +
-                  '<img src="spacer.gif" width="1" height="8" border="0" alt=""><br>' +
-                  (epText ? epText + '<img src="spacer.gif" width="1" height="8" border="0" alt=""><br>' : '') +
+                  '<img src="assets/img/spacer.gif" width="1" height="8" border="0" alt=""><br>' +
+                  (epText ? epText + '<img src="assets/img/spacer.gif" width="1" height="8" border="0" alt=""><br>' : '') +
                   commentBlock +
-                  (item.sum ? '<font size="2" color="' + THEME.textMuted + '">' + escHtml(item.sum) + '</font><br><img src="spacer.gif" width="1" height="8" border="0" alt=""><br>' : '') +
+                  (item.sum ? '<font size="2" color="' + THEME.textMuted + '">' + escHtml(item.sum) + '</font><br><img src="assets/img/spacer.gif" width="1" height="8" border="0" alt=""><br>' : '') +
                   tagsHtml +
                 '</td>' +
               '</tr></table>' +
             '</td></tr>' +
           '</table>' +
         '</td></tr>' +
-      '</table><img src="spacer.gif" width="1" height="12" border="0" alt=""><br>'
+      '</table><img src="assets/img/spacer.gif" width="1" height="12" border="0" alt=""><br>'
     );
   }
 
@@ -774,7 +776,7 @@
     if (item.eps > 0 && (item.t === 3 || (item.ep > 0 && item.ep < item.eps))) {
       var pct = Math.min(100, Math.round((item.ep * 100) / item.eps));
       progHtml =
-        '<img src="spacer.gif" width="1" height="4" border="0" alt=""><br>' +
+        '<img src="assets/img/spacer.gif" width="1" height="4" border="0" alt=""><br>' +
         '<font size="1" color="' + THEME.cyan + '" face="Consolas, monospace">进度 ' + item.ep + '/' + item.eps + '</font>' +
         barHtml(pct, 4, THEME.cyan, THEME.bgDeep);
     }
@@ -826,14 +828,14 @@
             '<font size="3" color="' + THEME.textMain + '"><b>' + escHtml(titleMain) + '</b></font>' +
           '</span><br>' +
           (titleSub ? '<font size="1" color="' + THEME.textMuted + '">' + escHtml(titleSub) + '</font><br>' : '') +
-          '<img src="spacer.gif" width="1" height="5" border="0" alt=""><br>' +
+          '<img src="assets/img/spacer.gif" width="1" height="5" border="0" alt=""><br>' +
           '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">' +
             (item.d ? escHtml(item.d) : '未知日期') +
             (item.sc > 0 ? ' · BGM <font color="' + THEME.amber + '"><b>' + item.sc + '</b></font>' : '') +
             (item.rk > 0 ? ' · <font color="' + THEME.textDim + '">#' + item.rk + '</font>' : '') +
           '</font><br>' +
           progHtml +
-          '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
+          '<img src="assets/img/spacer.gif" width="1" height="6" border="0" alt=""><br>' +
           tagsHtml +
         '</td>' +
       '</tr></table>';
@@ -1077,7 +1079,7 @@
     var accent = getAccentColor(state.mode);
 
     var html =
-      '<img src="spacer.gif" width="1" height="10" border="0" alt=""><br>' +
+      '<img src="assets/img/spacer.gif" width="1" height="10" border="0" alt=""><br>' +
       '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">' +
         '<tr><td bgcolor="' + THEME.bgElevated + '">' +
           '<table width="100%" border="0" cellpadding="10" cellspacing="0"><tr>' +
@@ -1259,7 +1261,7 @@
 
     var midLayout = '';
     if (vw < 780) {
-      midLayout = eraPanel + '<img src="spacer.gif" width="1" height="12" border="0" alt=""><br>' + tagPanel;
+      midLayout = eraPanel + '<img src="assets/img/spacer.gif" width="1" height="12" border="0" alt=""><br>' + tagPanel;
     } else {
       midLayout =
         '<table width="100%" border="0" cellpadding="0" cellspacing="0"><tr>' +
@@ -1271,9 +1273,9 @@
 
     return (
       histPanel +
-      '<img src="spacer.gif" width="1" height="12" border="0" alt=""><br>' +
+      '<img src="assets/img/spacer.gif" width="1" height="12" border="0" alt=""><br>' +
       midLayout +
-      '<img src="spacer.gif" width="1" height="12" border="0" alt=""><br>' +
+      '<img src="assets/img/spacer.gif" width="1" height="12" border="0" alt=""><br>' +
       hofSection
     );
   }
@@ -1311,7 +1313,7 @@
       var listHtml = state.view === 'table' ? renderTableView(pageItems) : renderGrid(pageItems, vw);
       bodyHtml =
         renderStatusAndControls(pool, filtered.length, vw) +
-        '<img src="spacer.gif" width="1" height="12" border="0" alt=""><br>' +
+        '<img src="assets/img/spacer.gif" width="1" height="12" border="0" alt=""><br>' +
         dossierHtml +
         listHtml +
         renderPagination(filtered.length);
@@ -1319,9 +1321,9 @@
 
     var fullHtml =
       renderMasthead(vw) +
-      '<img src="spacer.gif" width="1" height="10" border="0" alt=""><br>' +
+      '<img src="assets/img/spacer.gif" width="1" height="10" border="0" alt=""><br>' +
       renderNavTabs(vw) +
-      '<img src="spacer.gif" width="1" height="10" border="0" alt=""><br>' +
+      '<img src="assets/img/spacer.gif" width="1" height="10" border="0" alt=""><br>' +
       bodyHtml +
       renderFooter();
 
@@ -1639,6 +1641,19 @@
     },
     syncNow: function () {
       syncFromBangumi(false);
+    },
+    randomPick: function () {
+      var list = getFilteredItems();
+      if (!list || list.length === 0) list = getActivePool();
+      if (!list || list.length === 0) return;
+      var idx = Math.floor(Math.random() * list.length);
+      var picked = list[idx];
+      if (picked && picked.id) {
+        state.selectedId = picked.id;
+        try { window.location.hash = 'subject=' + picked.id; } catch (e) {}
+        render();
+        try { window.scrollTo(0, 0); } catch (e) {}
+      }
     },
     openExternal: function (url) {
       var u = safeUrl(url);
