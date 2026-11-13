@@ -1,16 +1,16 @@
-# GuraNirei // Bangumi Archive (UID 993671)
+# GuraNirei (@komariChikaA) // 个人空间、作品集与 Bangumi 收藏志
 
-纯 HTML + 向下兼容 ES3/ES5 JavaScript 构建的 Bangumi 动画与游戏个人收藏展示站（**零 CSS**）。
+纯 HTML + 向下兼容 ES3/ES5 JavaScript 构建的多页面个人展示站（**零 CSS**）。
 
-## 设计特性
+## 页面结构
 
-- **零 CSS 架构**：不使用 `<style>`、外链 `.css` 或任何 `style="..."` 属性，仅通过纯 HTML 表格结构、`bgcolor` 细线网格、`spacer.gif` 像素级进度条与 `<font>` 排版实现暗色主题与现代目录设计。
-- **向下兼容 JS**：完全采用 ES3/ES5 语法（`var`、`function`、`XMLHttpRequest` / `ActiveXObject`），无箭头函数、无模板字符串、无 `fetch` / `Promise` 依赖。
-- **双模式实时同步**：
-  - 预置 `data.js` 全量快照，首屏零延迟渲染并支持离线/旧版浏览器。
-  - 页面加载后自动通过 `XMLHttpRequest` 静默比对 `api.bgm.tv/v0/users/993671` 最新动态，并支持手动一键同步；同时配置 GitHub Actions 每日定时更新快照。
-- **完整浏览体验**：
-  - 动画 (`#F09199` Bangumi 樱粉) / 游戏 (`#60A5FA` 街机蓝) / 全部收录 / 数据图谱四大视图
-  - 收藏状态筛选与比例条、评分分级筛选、多维度排序、关键词检索、热门标签直达
-  - 画廊卡片与档案表格双视图，支持响应式列数自适应
-  - 作品详情档案面板（`#subject=<id>`）与评分直方图、年代分布、高频标签排行、9–10 分神作殿堂
+- [index.html](index.html)（`home.js`）：**首页概览** — 个人简介、三大创作方向、6 个精选原创项目展示，以及 Bangumi 近期动画/游戏更新速览。
+- [projects.html](projects.html)（`projects.js` + `projects_data.js`）：**项目作品集** — 展示 12 个公开原创项目（Galgame 猜谜《旮一把》、实景恐怖视觉小说《下午的节目》、MAD/Storybrew 渲染工程、Karuta 听歌猜作品、Draw2Guess 接龙画猜、Watch Room 放映室、HITA 插件等），支持分类筛选、搜索与详情档案面板。
+- [bangumi.html](bangumi.html)（`app.js` + `data.js`）：**Bangumi 动画与游戏志** — 完整展示 UID `993671` 的 484 部动画与 194 部游戏，支持多维筛选、双视图、统计图谱与 `XMLHttpRequest` 实时同步。
+- [about.html](about.html)（`about.js`）：**关于与历程** — 技术栈比例条、2026 开发时间线与在线阵地导航。
+
+## 设计与兼容特性
+
+- **零 CSS**：不使用 `<style>`、外链 `.css`、`style="..."` 或 `.style.` 操作；全部布局、细线网格、卡片等宽等高对齐与柱状图均由纯 HTML 表格、`bgcolor` 与 `spacer.gif` 完成，并消除文本超链接下划线。
+- **向下兼容 JS**：全站仅使用 ES3/ES5 语法（`var`、`function`、`XMLHttpRequest` / `ActiveXObject`），无需任何打包构建工具。
+- **自动同步**：GitHub Actions（`.github/workflows/sync-bangumi.yml`）每日自动更新 `data.js`，浏览器端亦会自动静默检测 Bangumi API 最新动态。

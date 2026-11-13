@@ -364,7 +364,6 @@
     var animeStats = computeSummary(dataStore.anime);
     var gameStats = computeSummary(dataStore.game);
     var allStats = computeSummary(dataStore.anime.concat(dataStore.game));
-    var u = dataStore.user;
     var isCompact = vw < 760;
 
     var syncText = '快照时间: ' + (dataStore.synced_at || '未知');
@@ -383,83 +382,62 @@
       syncDotColor = THEME.red;
     }
 
-    var profileBlock =
-      '<table border="0" cellpadding="0" cellspacing="0">' +
-        '<tr>' +
-          '<td valign="middle">' +
-            '<table border="0" cellpadding="2" cellspacing="0" bgcolor="' + THEME.pink + '"><tr><td bgcolor="' + THEME.bgDeep + '">' +
-              '<a href="' + escHtml(safeUrl(u.url)) + '" target="_blank"><img src="' + escHtml(safeUrl(u.avatar)) + '" width="76" height="76" border="0" alt="' + escHtml(u.nickname) + '"></a>' +
-            '</td></tr></table>' +
-          '</td>' +
-          '<td width="16">' + spacerImg(16, 1) + '</td>' +
-          '<td valign="middle">' +
-            '<font size="1" color="' + THEME.pink + '" face="Consolas, \'Courier New\', monospace"><b>BANGUMI ARCHIVE // UID #' + escHtml(u.username || u.id) + '</b></font><br>' +
-            '<font size="6" color="' + THEME.textMain + '"><b>' + escHtml(u.nickname) + '</b></font>&nbsp;&nbsp;' +
-            '<font size="2" color="' + THEME.textMuted + '">个人动画与游戏收藏志</font><br>' +
-            '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
-            '<font size="1" color="' + syncDotColor + '">●</font>&nbsp;<font size="1" color="' + THEME.textMuted + '" face="Consolas, \'Courier New\', monospace">' + escHtml(syncText) + '</font><br>' +
-            '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
-            '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
-              '<td bgcolor="#261821" onclick="window.BGM_APP.openExternal(\'' + escJsStr(safeUrl(u.url)) + '\')"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + THEME.pink + '"><b>&nbsp;Bangumi 个人主页 ↗&nbsp;</b></font></td></tr></table></td>' +
-              '<td width="8">' + spacerImg(8, 1) + '</td>' +
-              '<td bgcolor="#132536" onclick="window.BGM_APP.syncNow()"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + THEME.cyan + '"><b>&nbsp;↻ 实时同步&nbsp;</b></font></td></tr></table></td>' +
-            '</tr></table>' +
-          '</td>' +
-        '</tr>' +
-      '</table>';
+    var syncSide =
+      '<font size="1" color="' + THEME.pink + '" face="Consolas, \'Courier New\', monospace"><b>BANGUMI COLLECTION // UID #' + USER_ID + '</b></font><br>' +
+      '<img src="spacer.gif" width="1" height="4" border="0" alt=""><br>' +
+      '<font size="1" color="' + syncDotColor + '">●</font>&nbsp;<font size="1" color="' + THEME.textMuted + '" face="Consolas, \'Courier New\', monospace">' + escHtml(syncText) + '</font><br>' +
+      '<img src="spacer.gif" width="1" height="6" border="0" alt=""><br>' +
+      '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
+        '<td bgcolor="#132536" onclick="window.BGM_APP.syncNow()"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + THEME.cyan + '"><b>&nbsp;↻ 从 Bangumi 实时同步&nbsp;</b></font></td></tr></table></td>' +
+      '</tr></table>';
 
     var kpiBlock =
       '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">' +
         '<tr>' +
           '<td width="25%" bgcolor="' + THEME.bgElevated + '" align="center">' +
-            '<table border="0" cellpadding="8" cellspacing="0" width="100%"><tr><td align="center">' +
+            '<table border="0" cellpadding="6" cellspacing="0" width="100%"><tr><td align="center">' +
               '<font size="1" color="' + THEME.pink + '"><b>动画 ANIME</b></font><br>' +
-              '<font size="5" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + animeStats.total + '</b></font><br>' +
+              '<font size="4" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + animeStats.total + '</b></font><br>' +
               '<nobr><font size="1" color="' + THEME.textMuted + '">看过 ' + animeStats.counts[2] + ' · 在看 ' + animeStats.counts[3] + '</font></nobr>' +
             '</td></tr></table>' +
           '</td>' +
           '<td width="25%" bgcolor="' + THEME.bgElevated + '" align="center">' +
-            '<table border="0" cellpadding="8" cellspacing="0" width="100%"><tr><td align="center">' +
+            '<table border="0" cellpadding="6" cellspacing="0" width="100%"><tr><td align="center">' +
               '<font size="1" color="' + THEME.blue + '"><b>游戏 GAME</b></font><br>' +
-              '<font size="5" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + gameStats.total + '</b></font><br>' +
+              '<font size="4" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + gameStats.total + '</b></font><br>' +
               '<nobr><font size="1" color="' + THEME.textMuted + '">玩过 ' + gameStats.counts[2] + ' · 在玩 ' + gameStats.counts[3] + '</font></nobr>' +
             '</td></tr></table>' +
           '</td>' +
           '<td width="25%" bgcolor="' + THEME.bgElevated + '" align="center">' +
-            '<table border="0" cellpadding="8" cellspacing="0" width="100%"><tr><td align="center">' +
+            '<table border="0" cellpadding="6" cellspacing="0" width="100%"><tr><td align="center">' +
               '<font size="1" color="' + THEME.emerald + '"><b>总均分 AVG</b></font><br>' +
-              '<font size="5" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + allStats.avg + '</b></font><br>' +
+              '<font size="4" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + allStats.avg + '</b></font><br>' +
               '<nobr><font size="1" color="' + THEME.textMuted + '">已评分 ' + allStats.rated + ' 部</font></nobr>' +
             '</td></tr></table>' +
           '</td>' +
           '<td width="25%" bgcolor="' + THEME.bgElevated + '" align="center">' +
-            '<table border="0" cellpadding="8" cellspacing="0" width="100%"><tr><td align="center">' +
+            '<table border="0" cellpadding="6" cellspacing="0" width="100%"><tr><td align="center">' +
               '<font size="1" color="' + THEME.amber + '"><b>9分+ 殿堂</b></font><br>' +
-              '<font size="5" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + allStats.topRated + '</b></font><br>' +
+              '<font size="4" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + allStats.topRated + '</b></font><br>' +
               '<nobr><font size="1" color="' + THEME.textMuted + '">短评 ' + allStats.commented + ' 篇</font></nobr>' +
             '</td></tr></table>' +
           '</td>' +
         '</tr>' +
       '</table>';
 
-    var inner = '';
-    if (isCompact) {
-      inner =
-        '<tr><td>' + profileBlock + '</td></tr>' +
-        '<tr><td height="12">' + spacerImg(1, 12) + '</td></tr>' +
-        '<tr><td>' + kpiBlock + '</td></tr>';
-    } else {
-      inner =
-        '<tr>' +
-          '<td valign="middle">' + profileBlock + '</td>' +
-          '<td width="480" valign="middle" align="right">' + kpiBlock + '</td>' +
-        '</tr>';
-    }
+    var inner = isCompact
+      ? ('<tr><td>' + syncSide + '</td></tr><tr><td height="10">' + spacerImg(1, 10) + '</td></tr><tr><td>' + kpiBlock + '</td></tr>')
+      : ('<tr><td valign="middle">' + syncSide + '</td><td width="480" valign="middle" align="right">' + kpiBlock + '</td></tr>');
+
+    var siteHeader = (window.SITE_COMMON && window.SITE_COMMON.renderSiteHeader)
+      ? (window.SITE_COMMON.renderSiteHeader('bangumi', vw) + '<img src="spacer.gif" width="1" height="10" border="0" alt=""><br>')
+      : '';
 
     return (
+      siteHeader +
       '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">' +
         '<tr><td bgcolor="' + THEME.bgCard + '">' +
-          '<table width="100%" border="0" cellspacing="0" cellpadding="14">' + inner + '</table>' +
+          '<table width="100%" border="0" cellspacing="0" cellpadding="10">' + inner + '</table>' +
         '</td></tr>' +
       '</table>'
     );
@@ -1301,24 +1279,10 @@
   }
 
   function renderFooter() {
-    return (
-      '<img src="spacer.gif" width="1" height="16" border="0" alt=""><br>' +
-      '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">' +
-        '<tr><td bgcolor="' + THEME.bgCard + '">' +
-          '<table width="100%" border="0" cellpadding="12" cellspacing="0"><tr>' +
-            '<td>' +
-              '<font size="1" color="' + THEME.textMuted + '">' +
-                '数据来源: <span onclick="window.BGM_APP.openExternal(\'https://bangumi.tv/user/' + USER_ID + '\')"><font color="' + THEME.pink + '"><b>Bangumi 番组计划 (UID ' + USER_ID + ') ↗</b></font></span>' +
-                ' · 快照时间: <font face="Consolas, monospace">' + escHtml(dataStore.synced_at || '-') + '</font>' +
-              '</font>' +
-            '</td>' +
-            '<td align="right">' +
-              '<font size="1" color="' + THEME.textDim + '" face="Consolas, monospace">PURE HTML + ES5 JS · ZERO CSS · LEGACY COMPATIBLE</font>' +
-            '</td>' +
-          '</tr></table>' +
-        '</td></tr>' +
-      '</table>'
-    );
+    if (window.SITE_COMMON && window.SITE_COMMON.renderSiteFooter) {
+      return window.SITE_COMMON.renderSiteFooter();
+    }
+    return '';
   }
 
   function render() {
