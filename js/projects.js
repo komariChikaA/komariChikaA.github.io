@@ -26,6 +26,18 @@
     return null;
   }
 
+  function findNeighborProjectId(id, delta, filtered) {
+    var list = (filtered && filtered.length > 0) ? filtered : (window.CREATOR_DATA.projects || []);
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) {
+        var nextIdx = i + delta;
+        if (nextIdx >= 0 && nextIdx < list.length) return list[nextIdx].id;
+        return '';
+      }
+    }
+    return '';
+  }
+
   function countByCat(cat) {
     var list = window.CREATOR_DATA.projects || [];
     if (cat === 'all') return list.length;
@@ -61,67 +73,101 @@
       { id: 'systems', label: '硬件 · 课程', color: THEME.amber }
     ];
 
-    var catTabs = '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '"><tr>';
-    for (var i = 0; i < cats.length; i++) {
-      var ct = cats[i];
+    function catCell(ct, wPct) {
       var act = state.cat === ct.id;
       var cnt = countByCat(ct.id);
-      catTabs +=
-        '<td width="20%" bgcolor="' + (act ? ct.color : THEME.bgCard) + '" align="center" onclick="window.PROJECTS_APP.setCat(\'' + ct.id + '\')">' +
+      return (
+        '<td width="' + wPct + '" bgcolor="' + (act ? ct.color : THEME.bgCard) + '" align="center" onclick="window.PROJECTS_APP.setCat(\'' + ct.id + '\')">' +
           '<table border="0" cellpadding="8" cellspacing="0"><tr><td align="center">' +
-            '<font size="2" color="' + (act ? THEME.ink : THEME.textMain) + '"><b>' + C.escHtml(ct.label) + '</b></font> ' +
+            '<font size="' + (vw < 640 ? '1' : '2') + '" color="' + (act ? THEME.ink : THEME.textMain) + '"><b>' + C.escHtml(ct.label) + '</b></font> ' +
             '<font size="1" color="' + (act ? THEME.ink : ct.color) + '" face="Consolas, monospace">(' + cnt + ')</font>' +
           '</td></tr></table>' +
-        '</td>';
+        '</td>'
+      );
     }
-    catTabs += '</tr></table>';
+
+    var catTabs = '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">';
+    if (vw < 640) {
+      catTabs += '<tr>' + catCell(cats[0], '33%') + catCell(cats[1], '33%') + catCell(cats[2], '34%') + '</tr>';
+      catTabs += '<tr>' + catCell(cats[3], '50%') + catCell(cats[4], '50%') + '<td bgcolor="' + THEME.bgDeep + '"></td></tr>';
+    } else {
+      catTabs += '<tr>';
+      for (var i = 0; i < cats.length; i++) catTabs += catCell(cats[i], '20%');
+      catTabs += '</tr>';
+    }
+    catTabs += '</table>';
+
+    var formHtml =
+      '<form onsubmit="window.PROJECTS_APP.applySearch(); return false;">' +
+        '<img src="assets/img/px-code.gif" width="14" height="14" border="0" align="absmiddle" alt=""> ' +
+        '<font size="2" color="' + THEME.textMuted + '"><b>检索:</b></font> ' +
+        '<input type="text" id="proj-query" size="' + (vw < 640 ? '14' : '26') + '" value="' + C.escHtml(state.query) + '" placeholder="名称 / 技术栈 / 关键词"> ' +
+        '<button type="submit">搜索</button> ' +
+        '<button type="button" onclick="window.PROJECTS_APP.reset()">重置</button>' +
+      '</form>';
+    var statText = '<font size="1" color="' + THEME.textMuted + '">展示 <font color="' + THEME.emerald + '" face="Consolas, monospace"><b>' + filteredCount + '</b></font> 个项目 · 点击封面或标题查看档案</font>';
 
     var searchBar =
       '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">' +
         '<tr><td bgcolor="' + THEME.bgElevated + '">' +
-          '<table width="100%" border="0" cellpadding="10" cellspacing="0"><tr>' +
-            '<td>' +
-              '<form onsubmit="window.PROJECTS_APP.applySearch(); return false;">' +
-                '<img src="assets/img/px-code.gif" width="14" height="14" border="0" align="absmiddle" alt=""> ' +
-                '<font size="2" color="' + THEME.textMuted + '"><b>检索项目:</b></font> ' +
-                '<input type="text" id="proj-query" size="' + (vw < 640 ? '16' : '28') + '" value="' + C.escHtml(state.query) + '" placeholder="名称 / 技术栈 / 关键词"> ' +
-                '<button type="submit">搜索</button> ' +
-                '<button type="button" onclick="window.PROJECTS_APP.reset()">重置</button>' +
-              '</form>' +
-            '</td>' +
-            '<td align="right">' +
-              '<font size="1" color="' + THEME.textMuted + '">展示 <font color="' + THEME.emerald + '" face="Consolas, monospace"><b>' + filteredCount + '</b></font> 个项目 · 点击封面或标题查看档案</font>' +
-            '</td>' +
-          '</tr></table>' +
+          '<table width="100%" border="0" cellpadding="10" cellspacing="0">' +
+            (vw < 680
+              ? '<tr><td>' + formHtml + '</td></tr><tr><td>' + statText + '</td></tr>'
+              : '<tr><td>' + formHtml + '</td><td align="right">' + statText + '</td></tr>') +
+          '</table>' +
         '</td></tr>' +
       '</table>';
 
     return catTabs + '<img src="' + SP + '" width="1" height="10" border="0" alt=""><br>' + searchBar;
   }
 
-  function renderProjectCoverCell(p, w, h, onclickCode) {
-    var meta = getCatMeta(p.category);
-    var inner;
-    if (p.image) {
-      inner = w > 0
-        ? '<img src="' + C.escHtml(p.image) + '" width="' + w + '" height="' + h + '" border="0" alt="">'
-        : '<img src="' + C.escHtml(p.image) + '" width="100%" border="0" alt="">';
-    } else {
-      inner =
-        '<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#0F1420">' +
-          '<tr><td height="' + (h || 180) + '" align="center" valign="middle">' +
-            '<font size="2" color="' + meta.color + '" face="Consolas, monospace"><b>' + C.escHtml(p.lang.toUpperCase()) + ' // ENGINEERING</b></font><br>' +
-            C.spacerImg(1, 4) + '<br>' +
-            '<font size="1" color="' + THEME.textDim + '">' + C.escHtml(p.categoryLabel) + '</font>' +
-          '</td></tr>' +
-        '</table>';
-    }
-    return '<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="' + THEME.bgDeep + '"><tr><td align="center" valign="middle"' + (onclickCode ? ' onclick="' + onclickCode + '"' : '') + '>' + inner + '</td></tr></table>';
+  function renderBlueprintSlot(p, meta, imgH) {
+    var mod1 = p.tags[0] || p.lang;
+    var mod2 = p.tags[1] || 'MODULE';
+    var mod3 = p.tags[2] || 'BUILD';
+    return (
+      '<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#0D121D">' +
+        '<tr><td bgcolor="#151C2C">' +
+          '<table width="100%" border="0" cellpadding="5" cellspacing="0"><tr>' +
+            '<td><font size="1" color="' + meta.color + '" face="Consolas, monospace">●</font> <font size="1" color="' + THEME.cyan + '" face="Consolas, monospace">●</font> <font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">' + C.escHtml(p.id.toUpperCase()) + '</font></td>' +
+            '<td align="right"><font size="1" color="' + THEME.textDim + '" face="Consolas, monospace">' + C.escHtml(p.lang) + '</font></td>' +
+          '</tr></table>' +
+        '</td></tr>' +
+        '<tr><td height="' + Math.max(110, imgH - 28) + '" align="center" valign="middle">' +
+          '<table width="84%" border="0" cellpadding="0" cellspacing="4">' +
+            '<tr>' +
+              '<td width="33%" bgcolor="#182032" align="center"><table border="0" cellpadding="6" cellspacing="0"><tr><td align="center"><font size="1" color="' + meta.color + '" face="Consolas, monospace"><b>' + C.escHtml(mod1) + '</b></font></td></tr></table></td>' +
+              '<td width="34%" bgcolor="#1C253B" align="center"><table border="0" cellpadding="6" cellspacing="0"><tr><td align="center"><font size="1" color="' + THEME.textMain + '" face="Consolas, monospace"><b>' + C.escHtml(mod2) + '</b></font></td></tr></table></td>' +
+              '<td width="33%" bgcolor="#182032" align="center"><table border="0" cellpadding="6" cellspacing="0"><tr><td align="center"><font size="1" color="' + THEME.cyan + '" face="Consolas, monospace"><b>' + C.escHtml(mod3) + '</b></font></td></tr></table></td>' +
+            '</tr>' +
+            '<tr><td colspan="3" height="3" bgcolor="' + meta.color + '">' + C.spacerImg(1, 3) + '</td></tr>' +
+            '<tr><td colspan="3" align="center"><font size="1" color="' + THEME.textDim + '">' + C.escHtml(p.categoryLabel) + ' · SYSTEM ARCHITECTURE</font></td></tr>' +
+          '</table>' +
+        '</td></tr>' +
+      '</table>'
+    );
   }
 
-  function renderProjectDossier(p, vw) {
+  function renderProjectCoverCell(p, cellW, onclickCode) {
+    var meta = getCatMeta(p.category);
+    var imgW = Math.max(200, cellW - 4);
+    var imgH = Math.round((imgW * 9) / 16);
+    var inner = p.image
+      ? '<img src="' + C.escHtml(p.image) + '" width="' + imgW + '" height="' + imgH + '" border="0" alt="">'
+      : renderBlueprintSlot(p, meta, imgH);
+    return (
+      '<table width="100%" border="0" cellpadding="2" cellspacing="0" bgcolor="' + THEME.bgDeep + '">' +
+        '<tr><td align="center" valign="middle"' + (onclickCode ? ' onclick="' + onclickCode + '"' : '') + '>' + inner + '</td></tr>' +
+      '</table>'
+    );
+  }
+
+  function renderProjectDossier(p, vw, filtered) {
     if (!p) return '';
     var meta = getCatMeta(p.category);
+    var prevId = findNeighborProjectId(p.id, -1, filtered);
+    var nextId = findNeighborProjectId(p.id, 1, filtered);
+
     var hlHtml = '';
     for (var i = 0; i < p.highlights.length; i++) {
       hlHtml +=
@@ -155,32 +201,37 @@
       C.spacerImg(1, 8) + '<br>' +
       tagsHtml;
 
+    var shotCellW = vw >= 760 ? 340 : (C.getShellWidth(vw) - 36);
     var shotPart =
       '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.borderStrong + '">' +
         '<tr><td bgcolor="' + THEME.bgDeep + '" align="center">' +
-          renderProjectCoverCell(p, vw >= 760 ? 336 : 0, vw >= 760 ? 189 : 180, '') +
+          renderProjectCoverCell(p, shotCellW, '') +
         '</td></tr>' +
       '</table>';
+
+    var actionBtns =
+      '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
+        (prevId ? '<td>' + C.pillButtonHtml('‹ 上一项', '#1B2233', THEME.textMain, "window.PROJECTS_APP.openDetail('" + prevId + "')", false) + '</td><td width="6">' + C.spacerImg(6, 1) + '</td>' : '') +
+        (nextId ? '<td>' + C.pillButtonHtml('下一项 ›', '#1B2233', THEME.textMain, "window.PROJECTS_APP.openDetail('" + nextId + "')", false) + '</td><td width="6">' + C.spacerImg(6, 1) + '</td>' : '') +
+        (p.liveUrl ? '<td>' + C.pillButtonHtml('在线体验 ↗', '#132A24', THEME.emerald, "window.SITE_COMMON.openExternal('" + C.escJsStr(p.liveUrl) + "')", false) + '</td><td width="6">' + C.spacerImg(6, 1) + '</td>' : '') +
+        '<td>' + C.pillButtonHtml('GitHub ↗', '#1E273B', meta.color, "window.SITE_COMMON.openExternal('" + C.escJsStr(p.repoUrl) + "')", false) + '</td>' +
+        '<td width="6">' + C.spacerImg(6, 1) + '</td>' +
+        '<td>' + C.pillButtonHtml('× 关闭', '#2E171D', '#FCA5A5', "window.PROJECTS_APP.closeDetail()", false) + '</td>' +
+      '</tr></table>';
 
     return (
       '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + meta.color + '">' +
         '<tr><td bgcolor="' + THEME.bgCard + '">' +
           '<table width="100%" border="0" cellpadding="0" cellspacing="0">' +
             '<tr><td bgcolor="' + THEME.bgElevated + '">' +
-              '<table width="100%" border="0" cellpadding="10" cellspacing="0"><tr>' +
-                '<td><font size="2" color="' + meta.color + '" face="Consolas, monospace"><b>PROJECT DOSSIER // ' + C.escHtml(p.id.toUpperCase()) + '</b></font></td>' +
-                '<td align="right">' +
-                  '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
-                    (p.liveUrl ? '<td>' + C.pillButtonHtml('在线体验 / 阅读 ↗', '#132A24', THEME.emerald, "window.SITE_COMMON.openExternal('" + C.escJsStr(p.liveUrl) + "')", false) + '</td><td width="8">' + C.spacerImg(8, 1) + '</td>' : '') +
-                    '<td>' + C.pillButtonHtml('GitHub 仓库 ↗', '#1E273B', meta.color, "window.SITE_COMMON.openExternal('" + C.escJsStr(p.repoUrl) + "')", false) + '</td>' +
-                    '<td width="8">' + C.spacerImg(8, 1) + '</td>' +
-                    '<td>' + C.pillButtonHtml('× 关闭详情', '#2E171D', '#FCA5A5', "window.PROJECTS_APP.closeDetail()", false) + '</td>' +
-                  '</tr></table>' +
-                '</td>' +
-              '</tr></table>' +
+              '<table width="100%" border="0" cellpadding="10" cellspacing="0">' +
+                (vw < 720
+                  ? '<tr><td><font size="2" color="' + meta.color + '" face="Consolas, monospace"><b>DOSSIER // ' + C.escHtml(p.id.toUpperCase()) + '</b></font></td></tr><tr><td>' + actionBtns + '</td></tr>'
+                  : '<tr><td><font size="2" color="' + meta.color + '" face="Consolas, monospace"><b>PROJECT DOSSIER // ' + C.escHtml(p.id.toUpperCase()) + '</b></font></td><td align="right">' + actionBtns + '</td></tr>') +
+              '</table>' +
             '</td></tr>' +
             '<tr><td>' +
-              '<table width="100%" border="0" cellpadding="16" cellspacing="0">' +
+              '<table width="100%" border="0" cellpadding="14" cellspacing="0">' +
                 (vw < 760
                   ? '<tr><td>' + shotPart + '</td></tr><tr><td height="12">' + C.spacerImg(1, 12) + '</td></tr><tr><td>' + infoPart + '</td></tr>'
                   : '<tr><td width="340" valign="top">' + shotPart + '</td><td width="16">' + C.spacerImg(16, 1) + '</td><td valign="top">' + infoPart + '</td></tr>') +
@@ -205,24 +256,15 @@
     }
 
     var cols = C.getGridCols(vw);
-    var isFixed = (cols === 3 && vw >= 1140);
-    var contentW = isFixed ? 350 : 0;
     var gutterW = 12;
-    var imgW = isFixed ? 350 : 0;
-    var imgH = isFixed ? 197 : 180;
-    var wAttr = contentW > 0 ? (' width="' + contentW + '"') : '';
+    var contentW = C.getCardContentWidth(vw, cols, gutterW);
     var totalCols = cols * 3 + (cols - 1);
 
     var html = '<table width="100%" border="0" cellpadding="0" cellspacing="0">';
     html += '<tr>';
     for (var c = 0; c < cols; c++) {
       if (c > 0) html += '<td width="' + gutterW + '">' + C.spacerImg(gutterW, 1) + '</td>';
-      if (isFixed) {
-        html += '<td width="1">' + C.spacerImg(1, 1) + '</td><td width="' + contentW + '">' + C.spacerImg(contentW, 1) + '</td><td width="1">' + C.spacerImg(1, 1) + '</td>';
-      } else {
-        var pctW = cols === 2 ? '49%' : '100%';
-        html += '<td width="1">' + C.spacerImg(1, 1) + '</td><td width="' + pctW + '">' + C.spacerImg(1, 1) + '</td><td width="1">' + C.spacerImg(1, 1) + '</td>';
-      }
+      html += '<td width="1">' + C.spacerImg(1, 1) + '</td><td width="' + contentW + '">' + C.spacerImg(contentW, 1) + '</td><td width="1">' + C.spacerImg(1, 1) + '</td>';
     }
     html += '</tr>';
 
@@ -253,8 +295,8 @@
         if (pm) {
           html +=
             '<td width="1" bgcolor="' + THEME.border + '"></td>' +
-            '<td' + wAttr + ' bgcolor="' + THEME.bgDeep + '" valign="middle">' +
-              renderProjectCoverCell(pm, imgW, imgH, "window.PROJECTS_APP.openDetail('" + pm.id + "')") +
+            '<td width="' + contentW + '" bgcolor="' + THEME.bgDeep + '" valign="middle">' +
+              renderProjectCoverCell(pm, contentW, "window.PROJECTS_APP.openDetail('" + pm.id + "')") +
             '</td>' +
             '<td width="1" bgcolor="' + THEME.border + '"></td>';
         } else {
@@ -272,7 +314,7 @@
           var meta = getCatMeta(ph.category);
           html +=
             '<td width="1" bgcolor="' + THEME.border + '"></td>' +
-            '<td' + wAttr + ' bgcolor="' + THEME.bgCard + '" valign="middle">' +
+            '<td width="' + contentW + '" bgcolor="' + THEME.bgCard + '" valign="middle">' +
               '<table width="100%" border="0" cellpadding="8" cellspacing="0"><tr>' +
                 '<td align="left">' + C.badgeHtml(ph.categoryLabel, THEME.bgElevated, meta.color, false) + '</td>' +
                 '<td align="right">' + C.badgeHtml(ph.lang + (ph.stars > 0 ? (' · ★' + ph.stars) : ''), THEME.bgAlt, THEME.textMuted, true) + '</td>' +
@@ -299,7 +341,7 @@
           var firstPoint = pb.highlights && pb.highlights[0] ? C.truncateStr(pb.highlights[0], 34) : '';
           html +=
             '<td width="1" bgcolor="' + THEME.border + '"></td>' +
-            '<td' + wAttr + ' bgcolor="' + THEME.bgCard + '" valign="top">' +
+            '<td width="' + contentW + '" bgcolor="' + THEME.bgCard + '" valign="top">' +
               '<table width="100%" border="0" cellpadding="10" cellspacing="0"><tr><td>' +
                 '<span onclick="window.PROJECTS_APP.openDetail(\'' + pb.id + '\')"><font size="3" color="' + THEME.textMain + '"><b>' + C.escHtml(pb.name) + '</b></font></span><br>' +
                 C.spacerImg(1, 6) + '<br>' +
@@ -325,7 +367,7 @@
           var mc = getCatMeta(pf.category).color;
           html +=
             '<td width="1" bgcolor="' + THEME.border + '"></td>' +
-            '<td' + wAttr + ' bgcolor="' + THEME.bgAlt + '" valign="middle">' +
+            '<td width="' + contentW + '" bgcolor="' + THEME.bgAlt + '" valign="middle">' +
               '<table width="100%" border="0" cellpadding="6" cellspacing="0"><tr>' +
                 '<td><font size="1" color="' + THEME.textDim + '" face="Consolas, monospace">' + C.escHtml(pf.updated) + '</font></td>' +
                 '<td align="right">' +
@@ -383,9 +425,9 @@
       '<img src="' + SP + '" width="1" height="10" border="0" alt=""><br>' +
       renderFilterBar(filtered.length, vw) +
       '<img src="' + SP + '" width="1" height="12" border="0" alt=""><br>' +
-      renderProjectDossier(selected, vw) +
+      renderProjectDossier(selected, vw, filtered) +
       renderProjectGrid(filtered, vw) +
-      C.renderSiteFooter();
+      C.renderSiteFooter(vw);
 
     var root = document.getElementById('app-root');
     if (root) root.innerHTML = html;

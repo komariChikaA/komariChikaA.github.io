@@ -107,11 +107,14 @@
   }
 
   function getViewportWidth() {
+    if (window.SITE_COMMON && window.SITE_COMMON.getViewportWidth) {
+      return window.SITE_COMMON.getViewportWidth();
+    }
     var w = 1024;
-    if (typeof window.innerWidth === 'number' && window.innerWidth > 0) {
-      w = window.innerWidth;
-    } else if (document.documentElement && document.documentElement.clientWidth) {
+    if (document.documentElement && document.documentElement.clientWidth) {
       w = document.documentElement.clientWidth;
+    } else if (typeof window.innerWidth === 'number' && window.innerWidth > 0) {
+      w = window.innerWidth;
     } else if (document.body && document.body.clientWidth) {
       w = document.body.clientWidth;
     }
@@ -393,43 +396,31 @@
         '<td bgcolor="#241C3A" onclick="window.BGM_APP.randomPick()"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + THEME.violet + '"><b>&nbsp;🎲 随机抽选一部&nbsp;</b></font></td></tr></table></td>' +
       '</tr></table>';
 
-    var kpiBlock =
-      '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">' +
-        '<tr>' +
-          '<td width="25%" bgcolor="' + THEME.bgElevated + '" align="center">' +
-            '<table border="0" cellpadding="6" cellspacing="0" width="100%"><tr><td align="center">' +
-              '<font size="1" color="' + THEME.pink + '"><b>动画 ANIME</b></font><br>' +
-              '<font size="4" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + animeStats.total + '</b></font><br>' +
-              '<nobr><font size="1" color="' + THEME.textMuted + '">看过 ' + animeStats.counts[2] + ' · 在看 ' + animeStats.counts[3] + '</font></nobr>' +
-            '</td></tr></table>' +
-          '</td>' +
-          '<td width="25%" bgcolor="' + THEME.bgElevated + '" align="center">' +
-            '<table border="0" cellpadding="6" cellspacing="0" width="100%"><tr><td align="center">' +
-              '<font size="1" color="' + THEME.blue + '"><b>游戏 GAME</b></font><br>' +
-              '<font size="4" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + gameStats.total + '</b></font><br>' +
-              '<nobr><font size="1" color="' + THEME.textMuted + '">玩过 ' + gameStats.counts[2] + ' · 在玩 ' + gameStats.counts[3] + '</font></nobr>' +
-            '</td></tr></table>' +
-          '</td>' +
-          '<td width="25%" bgcolor="' + THEME.bgElevated + '" align="center">' +
-            '<table border="0" cellpadding="6" cellspacing="0" width="100%"><tr><td align="center">' +
-              '<font size="1" color="' + THEME.emerald + '"><b>总均分 AVG</b></font><br>' +
-              '<font size="4" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + allStats.avg + '</b></font><br>' +
-              '<nobr><font size="1" color="' + THEME.textMuted + '">已评分 ' + allStats.rated + ' 部</font></nobr>' +
-            '</td></tr></table>' +
-          '</td>' +
-          '<td width="25%" bgcolor="' + THEME.bgElevated + '" align="center">' +
-            '<table border="0" cellpadding="6" cellspacing="0" width="100%"><tr><td align="center">' +
-              '<font size="1" color="' + THEME.amber + '"><b>9分+ 殿堂</b></font><br>' +
-              '<font size="4" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + allStats.topRated + '</b></font><br>' +
-              '<nobr><font size="1" color="' + THEME.textMuted + '">短评 ' + allStats.commented + ' 篇</font></nobr>' +
-            '</td></tr></table>' +
-          '</td>' +
-        '</tr>' +
+    function kpiCell(lbl, lblCol, val, sub, wPct) {
+      return (
+        '<td width="' + wPct + '" bgcolor="' + THEME.bgElevated + '" align="center">' +
+          '<table border="0" cellpadding="6" cellspacing="0" width="100%"><tr><td align="center">' +
+            '<font size="1" color="' + lblCol + '"><b>' + lbl + '</b></font><br>' +
+            '<font size="4" color="' + THEME.textMain + '" face="Consolas, \'Courier New\', monospace"><b>' + val + '</b></font><br>' +
+            '<font size="1" color="' + THEME.textMuted + '">' + sub + '</font>' +
+          '</td></tr></table>' +
+        '</td>'
+      );
+    }
+
+    var kpiW = vw < 560 ? '50%' : '25%';
+    var k1 = kpiCell('动画 ANIME', THEME.pink, animeStats.total, '看过 ' + animeStats.counts[2] + ' · 在看 ' + animeStats.counts[3], kpiW);
+    var k2 = kpiCell('游戏 GAME', THEME.blue, gameStats.total, '玩过 ' + gameStats.counts[2] + ' · 在玩 ' + gameStats.counts[3], kpiW);
+    var k3 = kpiCell('总均分 AVG', THEME.emerald, allStats.avg, '已评分 ' + allStats.rated + ' 部', kpiW);
+    var k4 = kpiCell('9分+ 殿堂', THEME.amber, allStats.topRated, '短评 ' + allStats.commented + ' 篇', kpiW);
+
+    var kpiBlock = '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">' +
+      (vw < 560 ? ('<tr>' + k1 + k2 + '</tr><tr>' + k3 + k4 + '</tr>') : ('<tr>' + k1 + k2 + k3 + k4 + '</tr>')) +
       '</table>';
 
     var inner = isCompact
       ? ('<tr><td>' + syncSide + '</td></tr><tr><td height="10">' + spacerImg(1, 10) + '</td></tr><tr><td>' + kpiBlock + '</td></tr>')
-      : ('<tr><td valign="middle">' + syncSide + '</td><td width="480" valign="middle" align="right">' + kpiBlock + '</td></tr>');
+      : ('<tr><td valign="middle">' + syncSide + '</td><td width="460" valign="middle" align="right">' + kpiBlock + '</td></tr>');
 
     var siteHeader = (window.SITE_COMMON && window.SITE_COMMON.renderSiteHeader)
       ? (window.SITE_COMMON.renderSiteHeader('bangumi', vw) + '<img src="assets/img/spacer.gif" width="1" height="10" border="0" alt=""><br>')
@@ -450,36 +441,50 @@
     var gameCount = dataStore.game.length;
     var allCount = animeCount + gameCount;
 
-    var tabs = [
-      { id: 'anime', label: '✦ 动画 ANIME', count: animeCount, color: THEME.pink },
-      { id: 'game', label: '◈ 游戏 GAME', count: gameCount, color: THEME.blue },
-      { id: 'all', label: '◎ 全部作品 ALL', count: allCount, color: THEME.violet },
-      { id: 'analytics', label: '▤ 数据图谱 ANALYTICS', count: null, color: THEME.emerald }
-    ];
+    var tabs = vw < 640
+      ? [
+          { id: 'anime', label: '✦ 动画', count: animeCount, color: THEME.pink },
+          { id: 'game', label: '◈ 游戏', count: gameCount, color: THEME.blue },
+          { id: 'all', label: '◎ 全部作品', count: allCount, color: THEME.violet },
+          { id: 'analytics', label: '▤ 数据图谱', count: null, color: THEME.emerald }
+        ]
+      : [
+          { id: 'anime', label: '✦ 动画 ANIME', count: animeCount, color: THEME.pink },
+          { id: 'game', label: '◈ 游戏 GAME', count: gameCount, color: THEME.blue },
+          { id: 'all', label: '◎ 全部作品 ALL', count: allCount, color: THEME.violet },
+          { id: 'analytics', label: '▤ 数据图谱 ANALYTICS', count: null, color: THEME.emerald }
+        ];
 
-    var html = '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '"><tr>';
-    for (var i = 0; i < tabs.length; i++) {
-      var tb = tabs[i];
+    function navCell(tb, colW) {
       var active = state.mode === tb.id;
       var bg = active ? tb.color : THEME.bgCard;
       var fg = active ? THEME.ink : THEME.textMain;
       var subFg = active ? THEME.ink : tb.color;
       var countStr = tb.count !== null ? ' <font size="1" color="' + subFg + '" face="Consolas, \'Courier New\', monospace">(' + tb.count + ')</font>' : '';
-      var topLine = active ? tb.color : THEME.border;
-
-      html +=
-        '<td width="25%" bgcolor="' + bg + '" align="center" valign="middle" onclick="window.BGM_APP.setMode(\'' + tb.id + '\')">' +
+      return (
+        '<td width="' + colW + '" bgcolor="' + bg + '" align="center" valign="middle" onclick="window.BGM_APP.setMode(\'' + tb.id + '\')">' +
           '<table width="100%" border="0" cellpadding="0" cellspacing="0">' +
             '<tr><td height="3" bgcolor="' + tb.color + '">' + spacerImg(1, 3) + '</td></tr>' +
             '<tr><td align="center">' +
-              '<table border="0" cellpadding="9" cellspacing="0"><tr><td align="center">' +
-                '<font size="' + (vw < 540 ? '2' : '3') + '" color="' + fg + '"><b>' + tb.label + '</b></font>' + countStr +
+              '<table border="0" cellpadding="8" cellspacing="0"><tr><td align="center">' +
+                '<font size="' + (vw < 700 ? '2' : '3') + '" color="' + fg + '"><b>' + tb.label + '</b></font>' + countStr +
               '</td></tr></table>' +
             '</td></tr>' +
           '</table>' +
-        '</td>';
+        '</td>'
+      );
     }
-    html += '</tr></table>';
+
+    var html = '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">';
+    if (vw < 640) {
+      html += '<tr>' + navCell(tabs[0], '50%') + navCell(tabs[1], '50%') + '</tr>';
+      html += '<tr>' + navCell(tabs[2], '50%') + navCell(tabs[3], '50%') + '</tr>';
+    } else {
+      html += '<tr>';
+      for (var i = 0; i < tabs.length; i++) html += navCell(tabs[i], '25%');
+      html += '</tr>';
+    }
+    html += '</table>';
     return html;
   }
 
@@ -488,16 +493,17 @@
     var accent = getAccentColor(state.mode);
     var total = summary.total > 0 ? summary.total : 1;
 
-    // Status pills row (zero underline via td onclick)
-    var statusTabs = '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '"><tr>';
+    // Status pills row (zero underline via td onclick; 2x3 grid on phones)
+    var stCells = [];
     var allActive = state.status === 0;
-    statusTabs +=
-      '<td bgcolor="' + (allActive ? THEME.bgElevated : THEME.bgCard) + '" align="center" onclick="window.BGM_APP.setStatus(0)">' +
+    stCells.push(
+      '<td' + (vw < 640 ? ' width="33%"' : '') + ' bgcolor="' + (allActive ? THEME.bgElevated : THEME.bgCard) + '" align="center" onclick="window.BGM_APP.setStatus(0)">' +
         '<table border="0" cellpadding="7" cellspacing="0" width="100%"><tr><td align="center">' +
-          '<font size="2" color="' + (allActive ? accent : THEME.textMain) + '"><b>全部</b></font> ' +
+          '<font size="' + (vw < 640 ? '1' : '2') + '" color="' + (allActive ? accent : THEME.textMain) + '"><b>全部</b></font> ' +
           '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">(' + summary.total + ')</font>' +
         '</td></tr></table>' +
-      '</td>';
+      '</td>'
+    );
 
     for (var i = 0; i < STATUS_ORDER.length; i++) {
       var stCode = STATUS_ORDER[i];
@@ -505,16 +511,23 @@
       var isAct = state.status === stCode;
       var lbl = getStatusLabel(stCode, state.mode);
       var cnt = summary.counts[stCode] || 0;
-      statusTabs +=
-        '<td bgcolor="' + (isAct ? meta.bg : THEME.bgCard) + '" align="center" onclick="window.BGM_APP.setStatus(' + stCode + ')">' +
+      stCells.push(
+        '<td' + (vw < 640 ? ' width="33%"' : '') + ' bgcolor="' + (isAct ? meta.bg : THEME.bgCard) + '" align="center" onclick="window.BGM_APP.setStatus(' + stCode + ')">' +
           '<table border="0" cellpadding="7" cellspacing="0" width="100%"><tr><td align="center">' +
             '<font size="1" color="' + meta.color + '">■</font> ' +
-            '<font size="2" color="' + (isAct ? meta.text : THEME.textMain) + '"><b>' + lbl + '</b></font> ' +
+            '<font size="' + (vw < 640 ? '1' : '2') + '" color="' + (isAct ? meta.text : THEME.textMain) + '"><b>' + lbl + '</b></font> ' +
             '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">(' + cnt + ')</font>' +
           '</td></tr></table>' +
-        '</td>';
+        '</td>'
+      );
     }
-    statusTabs += '</tr></table>';
+    var statusTabs = '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">';
+    if (vw < 640) {
+      statusTabs += '<tr>' + stCells[0] + stCells[1] + stCells[2] + '</tr><tr>' + stCells[3] + stCells[4] + stCells[5] + '</tr>';
+    } else {
+      statusTabs += '<tr>' + stCells.join('') + '</tr>';
+    }
+    statusTabs += '</table>';
 
     // Segmented visual proportion bar
     var segBar = '<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="' + THEME.bgDeep + '"><tr>';
@@ -535,7 +548,7 @@
 
     // Compact single-row hot tag chips (zero underline) + full dropdown
     var allTags = getTopTags(pool, state.status, 30);
-    var chipTags = allTags.slice(0, vw < 640 ? 5 : 8);
+    var chipTags = allTags.slice(0, vw < 640 ? 3 : 8);
     var tagRowHtml = '';
     if (chipTags.length > 0 || state.tag) {
       tagRowHtml = '<table border="0" cellpadding="2" cellspacing="3"><tr><td valign="middle"><font size="1" color="' + THEME.textMuted + '"><b>快捷标签:</b></font></td>';
@@ -628,6 +641,7 @@
         '</td>' +
       '</tr></table>';
 
+    var selectsGroup = tagSelect + ' ' + rateSelect + ' ' + sortSelect + ' ' + sizeSelect;
     var toolbar =
       '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + THEME.border + '">' +
         '<tr><td bgcolor="' + THEME.bgElevated + '">' +
@@ -635,16 +649,45 @@
             '<tr><td>' +
               '<form onsubmit="window.BGM_APP.applySearch(); return false;">' +
                 '<table width="100%" border="0" cellspacing="0" cellpadding="4">' +
-                  '<tr>' +
-                    '<td valign="middle">' +
-                      '<font size="2" color="' + THEME.textMuted + '"><b>检索:</b></font> ' +
-                      '<input type="text" id="ctrl-query" size="' + (vw < 640 ? '14' : '20') + '" value="' + escHtml(state.query) + '" placeholder="标题 / 原名 / 短评 / 标签"> ' +
-                      '<button type="submit">搜索</button> ' +
-                      '<button type="button" onclick="window.BGM_APP.resetFilters()">重置</button> ' +
-                      '&nbsp;' + tagSelect + ' ' + rateSelect + ' ' + sortSelect + ' ' + sizeSelect +
-                    '</td>' +
-                    '<td align="right" valign="middle">' + viewSwitch + '</td>' +
-                  '</tr>' +
+                  (vw < 640
+                    ? (
+                      '<tr>' +
+                        '<td valign="middle">' +
+                          '<font size="2" color="' + THEME.textMuted + '"><b>检索:</b></font> ' +
+                          '<input type="text" id="ctrl-query" size="12" value="' + escHtml(state.query) + '" placeholder="标题 / 短评"> ' +
+                          '<button type="submit">搜索</button> ' +
+                          '<button type="button" onclick="window.BGM_APP.resetFilters()">重置</button>' +
+                        '</td>' +
+                      '</tr>' +
+                      '<tr><td valign="middle">' + tagSelect + ' ' + rateSelect + '</td></tr>' +
+                      '<tr><td valign="middle">' + sortSelect + ' ' + sizeSelect + '</td></tr>' +
+                      '<tr><td align="left" valign="middle">' + viewSwitch + '</td></tr>'
+                    )
+                    : (vw < 900
+                      ? (
+                        '<tr>' +
+                          '<td valign="middle">' +
+                            '<font size="2" color="' + THEME.textMuted + '"><b>检索:</b></font> ' +
+                            '<input type="text" id="ctrl-query" size="22" value="' + escHtml(state.query) + '" placeholder="标题 / 原名 / 短评"> ' +
+                            '<button type="submit">搜索</button> ' +
+                            '<button type="button" onclick="window.BGM_APP.resetFilters()">重置</button>' +
+                          '</td>' +
+                          '<td align="right" valign="middle">' + viewSwitch + '</td>' +
+                        '</tr>' +
+                        '<tr><td colspan="2" valign="middle">' + selectsGroup + '</td></tr>'
+                      )
+                      : (
+                        '<tr>' +
+                          '<td valign="middle">' +
+                            '<font size="2" color="' + THEME.textMuted + '"><b>检索:</b></font> ' +
+                            '<input type="text" id="ctrl-query" size="20" value="' + escHtml(state.query) + '" placeholder="标题 / 原名 / 短评 / 标签"> ' +
+                            '<button type="submit">搜索</button> ' +
+                            '<button type="button" onclick="window.BGM_APP.resetFilters()">重置</button> ' +
+                            '&nbsp;' + selectsGroup +
+                          '</td>' +
+                          '<td align="right" valign="middle">' + viewSwitch + '</td>' +
+                        '</tr>'
+                      ))) +
                 '</table>' +
               '</form>' +
             '</td></tr>' +
@@ -665,13 +708,27 @@
     return statusTabs + segBar + '<img src="assets/img/spacer.gif" width="1" height="10" border="0" alt=""><br>' + toolbar;
   }
 
-  function renderDossier(item, vw) {
+  function findNeighborSubjectId(id, delta, filtered) {
+    var list = (filtered && filtered.length > 0) ? filtered : getActivePool();
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) {
+        var nextIdx = i + delta;
+        if (nextIdx >= 0 && nextIdx < list.length) return list[nextIdx].id;
+        return 0;
+      }
+    }
+    return 0;
+  }
+
+  function renderDossier(item, vw, filtered) {
     if (!item) return '';
     var accent = item.st === 4 ? THEME.blue : THEME.pink;
     var stMeta = STATUS_META[item.t] || STATUS_META[2];
     var stLabel = getStatusLabel(item.t, item.st);
     var scColors = getScoreColors(item.r);
-    var coverW = vw < 640 ? 110 : 170;
+    var coverW = vw < 640 ? 120 : 170;
+    var prevId = findNeighborSubjectId(item.id, -1, filtered);
+    var nextId = findNeighborSubjectId(item.id, 1, filtered);
 
     var tagsHtml = '';
     if (item.tags && item.tags.length > 0) {
@@ -706,47 +763,54 @@
         '</td></tr></table><br>';
     }
 
+    var dossierActions =
+      '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
+        (prevId ? '<td bgcolor="#1B2233" onclick="window.BGM_APP.openDetail(' + prevId + ')"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + THEME.textMain + '"><b>&nbsp;‹ 上一部&nbsp;</b></font></td></tr></table></td><td width="6">' + spacerImg(6, 1) + '</td>' : '') +
+        (nextId ? '<td bgcolor="#1B2233" onclick="window.BGM_APP.openDetail(' + nextId + ')"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + THEME.textMain + '"><b>&nbsp;下一部 ›&nbsp;</b></font></td></tr></table></td><td width="6">' + spacerImg(6, 1) + '</td>' : '') +
+        '<td bgcolor="#1E273B" onclick="window.BGM_APP.openSubjectBgm(' + item.id + ')"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="' + accent + '"><b>&nbsp;Bangumi ↗&nbsp;</b></font></td></tr></table></td>' +
+        '<td width="6">' + spacerImg(6, 1) + '</td>' +
+        '<td bgcolor="#2E171D" onclick="window.BGM_APP.closeDetail()"><table border="0" cellpadding="4" cellspacing="0"><tr><td><font size="1" color="#FCA5A5"><b>&nbsp;× 关闭&nbsp;</b></font></td></tr></table></td>' +
+      '</tr></table>';
+
+    var coverBlock =
+      '<table border="0" cellpadding="3" cellspacing="0" bgcolor="' + THEME.bgDeep + '"><tr><td>' +
+        (item.img ? '<img src="' + escHtml(safeUrl(item.img)) + '" width="' + coverW + '" border="0" alt="' + escHtml(item.cn || item.n) + '">' : '<font size="2" color="' + THEME.textDim + '">无封面</font>') +
+      '</td></tr></table>';
+
+    var infoBlock =
+      '<table border="0" cellpadding="0" cellspacing="4"><tr>' +
+        '<td>' + badgeHtml(stLabel, stMeta.bg, stMeta.text, false) + '</td>' +
+        '<td>' + badgeHtml(item.r > 0 ? ('个人评分 ★ ' + item.r + '/10') : '个人未评分', scColors.bg, scColors.fg, true) + '</td>' +
+        (item.sc > 0 ? '<td>' + badgeHtml('BGM ' + item.sc + (item.rk > 0 ? (' · #' + item.rk) : ''), THEME.bgAlt, THEME.textMuted, true) + '</td>' : '') +
+      '</tr></table>' +
+      '<img src="assets/img/spacer.gif" width="1" height="6" border="0" alt=""><br>' +
+      '<font size="5" color="' + THEME.textMain + '"><b>' + escHtml(item.cn || item.n) + '</b></font><br>' +
+      (item.cn && item.n && item.cn !== item.n ? '<font size="2" color="' + THEME.textMuted + '">' + escHtml(item.n) + '</font><br>' : '') +
+      '<img src="assets/img/spacer.gif" width="1" height="6" border="0" alt=""><br>' +
+      '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">发行/放送日期: ' + escHtml(item.d || '未知') + ' &nbsp;|&nbsp; 收藏更新: ' + escHtml(item.u || '未知') + ' &nbsp;|&nbsp; 收藏热度: ' + (item.ct || 0) + ' 人</font><br>' +
+      '<img src="assets/img/spacer.gif" width="1" height="8" border="0" alt=""><br>' +
+      (epText ? epText + '<img src="assets/img/spacer.gif" width="1" height="8" border="0" alt=""><br>' : '') +
+      commentBlock +
+      (item.sum ? '<font size="2" color="' + THEME.textMuted + '">' + escHtml(item.sum) + '</font><br><img src="assets/img/spacer.gif" width="1" height="8" border="0" alt=""><br>' : '') +
+      tagsHtml;
+
     return (
       '<table width="100%" border="0" cellspacing="1" cellpadding="0" bgcolor="' + accent + '">' +
         '<tr><td bgcolor="' + THEME.bgCard + '">' +
           '<table width="100%" border="0" cellpadding="0" cellspacing="0">' +
             '<tr><td bgcolor="' + THEME.bgElevated + '">' +
-              '<table width="100%" border="0" cellpadding="10" cellspacing="0"><tr>' +
-                '<td><font size="2" color="' + accent + '" face="Consolas, monospace"><b>SUBJECT DOSSIER // #' + item.id + ' · ' + (item.st === 4 ? 'GAME' : 'ANIME') + '</b></font></td>' +
-                '<td align="right">' +
-                  '<table border="0" cellpadding="0" cellspacing="0"><tr>' +
-                    '<td bgcolor="#1E273B" onclick="window.BGM_APP.openSubjectBgm(' + item.id + ')"><table border="0" cellpadding="5" cellspacing="0"><tr><td><font size="1" color="' + accent + '"><b>&nbsp;在 Bangumi 打开 ↗&nbsp;</b></font></td></tr></table></td>' +
-                    '<td width="8">' + spacerImg(8, 1) + '</td>' +
-                    '<td bgcolor="#2E171D" onclick="window.BGM_APP.closeDetail()"><table border="0" cellpadding="5" cellspacing="0"><tr><td><font size="1" color="#FCA5A5"><b>&nbsp;× 关闭详情&nbsp;</b></font></td></tr></table></td>' +
-                  '</tr></table>' +
-                '</td>' +
-              '</tr></table>' +
+              '<table width="100%" border="0" cellpadding="10" cellspacing="0">' +
+                (vw < 680
+                  ? '<tr><td><font size="2" color="' + accent + '" face="Consolas, monospace"><b>SUBJECT // #' + item.id + '</b></font></td></tr><tr><td>' + dossierActions + '</td></tr>'
+                  : '<tr><td><font size="2" color="' + accent + '" face="Consolas, monospace"><b>SUBJECT DOSSIER // #' + item.id + ' · ' + (item.st === 4 ? 'GAME' : 'ANIME') + '</b></font></td><td align="right">' + dossierActions + '</td></tr>') +
+              '</table>' +
             '</td></tr>' +
             '<tr><td>' +
-              '<table width="100%" border="0" cellpadding="14" cellspacing="0"><tr>' +
-                '<td width="' + (coverW + 12) + '" valign="top" align="center">' +
-                  '<table border="0" cellpadding="3" cellspacing="0" bgcolor="' + THEME.bgDeep + '"><tr><td>' +
-                    (item.img ? '<img src="' + escHtml(safeUrl(item.img)) + '" width="' + coverW + '" border="0" alt="' + escHtml(item.cn || item.n) + '">' : '<font size="2" color="' + THEME.textDim + '">无封面</font>') +
-                  '</td></tr></table>' +
-                '</td>' +
-                '<td valign="top">' +
-                  '<table border="0" cellpadding="0" cellspacing="4"><tr>' +
-                    '<td>' + badgeHtml(stLabel, stMeta.bg, stMeta.text, false) + '</td>' +
-                    '<td>' + badgeHtml(item.r > 0 ? ('个人评分 ★ ' + item.r + '/10') : '个人未评分', scColors.bg, scColors.fg, true) + '</td>' +
-                    (item.sc > 0 ? '<td>' + badgeHtml('BGM ' + item.sc + (item.rk > 0 ? (' · #' + item.rk) : ''), THEME.bgAlt, THEME.textMuted, true) + '</td>' : '') +
-                  '</tr></table>' +
-                  '<img src="assets/img/spacer.gif" width="1" height="6" border="0" alt=""><br>' +
-                  '<font size="5" color="' + THEME.textMain + '"><b>' + escHtml(item.cn || item.n) + '</b></font><br>' +
-                  (item.cn && item.n && item.cn !== item.n ? '<font size="2" color="' + THEME.textMuted + '">' + escHtml(item.n) + '</font><br>' : '') +
-                  '<img src="assets/img/spacer.gif" width="1" height="6" border="0" alt=""><br>' +
-                  '<font size="1" color="' + THEME.textMuted + '" face="Consolas, monospace">发行/放送日期: ' + escHtml(item.d || '未知') + ' &nbsp;|&nbsp; 收藏更新: ' + escHtml(item.u || '未知') + ' &nbsp;|&nbsp; 收藏热度: ' + (item.ct || 0) + ' 人</font><br>' +
-                  '<img src="assets/img/spacer.gif" width="1" height="8" border="0" alt=""><br>' +
-                  (epText ? epText + '<img src="assets/img/spacer.gif" width="1" height="8" border="0" alt=""><br>' : '') +
-                  commentBlock +
-                  (item.sum ? '<font size="2" color="' + THEME.textMuted + '">' + escHtml(item.sum) + '</font><br><img src="assets/img/spacer.gif" width="1" height="8" border="0" alt=""><br>' : '') +
-                  tagsHtml +
-                '</td>' +
-              '</tr></table>' +
+              '<table width="100%" border="0" cellpadding="14" cellspacing="0">' +
+                (vw < 620
+                  ? '<tr><td align="center">' + coverBlock + '</td></tr><tr><td>' + infoBlock + '</td></tr>'
+                  : '<tr><td width="' + (coverW + 12) + '" valign="top" align="center">' + coverBlock + '</td><td valign="top">' + infoBlock + '</td></tr>') +
+              '</table>' +
             '</td></tr>' +
           '</table>' +
         '</td></tr>' +
@@ -877,9 +941,11 @@
       return renderEmptyState();
     }
     var cols = getGridCols(vw);
-    var isFixedDesktop = (cols === 3 && vw >= 1140);
-    var contentW = isFixedDesktop ? 350 : 0; // 3 * (350 + 2 borders) + 2 * 12 gutter = 1080 exact!
     var gutterW = 12;
+    var contentW = (window.SITE_COMMON && window.SITE_COMMON.getCardContentWidth)
+      ? window.SITE_COMMON.getCardContentWidth(vw, cols, gutterW)
+      : (cols === 3 && vw >= 1140 ? 350 : 0);
+    var isFixedDesktop = contentW > 0;
     var totalTableCols = cols * 3 + (cols - 1);
 
     var html = '<table width="100%" border="0" cellpadding="0" cellspacing="0">';
@@ -1280,29 +1346,31 @@
     );
   }
 
-  function renderFooter() {
+  function renderFooter(vw) {
     if (window.SITE_COMMON && window.SITE_COMMON.renderSiteFooter) {
-      return window.SITE_COMMON.renderSiteFooter();
+      return window.SITE_COMMON.renderSiteFooter(vw);
     }
     return '';
   }
 
   function render() {
     var vw = getViewportWidth();
-    var shell = document.getElementById('main-shell');
-    if (shell) {
-      shell.width = vw >= 1140 ? '1080' : '100%';
+    if (window.SITE_COMMON && window.SITE_COMMON.applyShellWidth) {
+      window.SITE_COMMON.applyShellWidth(vw);
+    } else {
+      var shell = document.getElementById('main-shell');
+      if (shell) shell.width = vw >= 1140 ? '1080' : '100%';
     }
 
+    var pool = getActivePool();
+    var filtered = getFilteredItems();
     var selectedItem = state.selectedId ? findItemById(state.selectedId) : null;
-    var dossierHtml = selectedItem ? renderDossier(selectedItem, vw) : '';
+    var dossierHtml = selectedItem ? renderDossier(selectedItem, vw, filtered) : '';
 
     var bodyHtml = '';
     if (state.mode === 'analytics') {
       bodyHtml = dossierHtml + renderAnalytics(vw);
     } else {
-      var pool = getActivePool();
-      var filtered = getFilteredItems();
       var pageItems = filtered;
       if (state.pageSize > 0) {
         var totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
@@ -1325,7 +1393,7 @@
       renderNavTabs(vw) +
       '<img src="assets/img/spacer.gif" width="1" height="10" border="0" alt=""><br>' +
       bodyHtml +
-      renderFooter();
+      renderFooter(vw);
 
     var root = document.getElementById('app-root');
     if (root) {
